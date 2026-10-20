@@ -1,0 +1,44 @@
+<Window x:Class="CinemaManagement.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Sign In - Cinema Management"
+        Height="430" Width="460"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F6FA">
+    <Grid Margin="35">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="CINEMA MANAGEMENT"
+                   FontSize="25" FontWeight="Bold"
+                   Foreground="#1E293B" HorizontalAlignment="Center"
+                   Margin="0,10,0,8"/>
+        <TextBlock Grid.Row="1" Text="Sign in to continue"
+                   FontSize="15" Foreground="#64748B"
+                   HorizontalAlignment="Center" Margin="0,0,0,25"/>
+        <StackPanel Grid.Row="2" Margin="0,0,0,15">
+            <TextBlock Text="Username" Margin="0,0,0,6" FontWeight="SemiBold"/>
+            <TextBox x:Name="UsernameTextBox" Height="36" Padding="8"
+                     FontSize="14" VerticalContentAlignment="Center"/>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Margin="0,0,0,12">
+            <TextBlock Text="Password" Margin="0,0,0,6" FontWeight="SemiBold"/>
+            <PasswordBox x:Name="PasswordBox" Height="36" Padding="8"
+                         FontSize="14" VerticalContentAlignment="Center"/>
+        </StackPanel>
+        <TextBlock x:Name="ErrorText" Grid.Row="4"
+                   Foreground="#DC2626" TextWrapping="Wrap"
+                   Margin="0,0,0,10"/>
+        <Button Grid.Row="5" Content="Sign In" Height="42"
+                VerticalAlignment="Top" Click="SignInButton_Click"
+                Background="#2563EB" Foreground="White"
+                FontSize="15" FontWeight="SemiBold" BorderThickness="0"
+                Cursor="Hand"/>
+    </Grid>
+</Window>
