@@ -6,64 +6,95 @@
       mc:Ignorable="d"
       d:DesignHeight="450" d:DesignWidth="800">
 
-    <Grid Margin="12"
-          ClipToBounds="True"
-          Background="#F5F6FA">
-
+    <Grid Margin="15" Background="Snow">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,12">
-            <TextBlock Text="Now Showing"
-                       FontSize="22"
+        <!-- F01: Title -->
+        <StackPanel Grid.Row="0"
+                    Margin="0,0,0,15">
+
+            <TextBlock Text="NOW SHOWING"
+                       FontSize="24"
                        FontWeight="Bold"
                        Foreground="#1E293B"/>
 
-            <TextBlock
-                Text="Movies currently available at our cinema"
-                FontSize="13"
-                Foreground="#64748B"
-                Margin="0,3,0,0"/>
+            <TextBlock Text="Movies currently available at the cinema"
+                       FontSize="14"
+                       Foreground="#64748B"
+                       Margin="0,5,0,0"/>
         </StackPanel>
 
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding Movies}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  CanUserAddRows="False"
-                  HeadersVisibility="Column"
-                  GridLinesVisibility="Horizontal"
-                  AlternatingRowBackground="#F1F5F9"
-                  Background="White"
-                  BorderBrush="#CBD5E1"
-                  RowHeight="36"
-                  ColumnHeaderHeight="38"
-                  ScrollViewer.VerticalScrollBarVisibility="Auto"
-                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
+        <!-- F02: Search -->
+        <StackPanel Grid.Row="1"
+                    Margin="0,0,0,15">
 
-            <DataGrid.Columns>
-                <DataGridTextColumn
-                    Header="ID"
-                    Binding="{Binding Id}"
-                    Width="55"/>
+            <TextBlock Text="Search Movies"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Foreground="#1E293B"
+                       Margin="0,0,0,5"/>
 
-                <DataGridTextColumn
-                    Header="Movie Title"
-                    Binding="{Binding Title}"
-                    Width="*"/>
+            <TextBox Width="300"
+                     Height="35"
+                     HorizontalAlignment="Left"
+                     VerticalContentAlignment="Center"
+                     Padding="10,0"
+                     FontSize="14"
+                     Text="{Binding searchtext, UpdateSourceTrigger=PropertyChanged}"/>
+        </StackPanel>
 
-                <DataGridTextColumn
-                    Header="Genre"
-                    Binding="{Binding Genre}"
-                    Width="150"/>
+        <!-- F01: Movie Catalogue -->
+        <Border Grid.Row="2"
+                Background="White"
+                BorderBrush="#E2E8F0"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="10">
 
-                <DataGridTextColumn
-                    Header="Duration (min)"
-                    Binding="{Binding DurationMinutes}"
-                    Width="140"/>
-            </DataGrid.Columns>
-        </DataGrid>
+            <DataGrid ItemsSource="{Binding Movies}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      CanUserAddRows="False"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="#E2E8F0"
+                      AlternatingRowBackground="#F1F5F9"
+                      Background="White"
+                      BorderThickness="0"
+                      FontSize="14"
+                      RowHeight="40"
+                      ColumnHeaderHeight="40"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
+
+                <DataGrid.Columns>
+
+                    <DataGridTextColumn
+                        Header="ID"
+                        Binding="{Binding Id}"
+                        Width="70"/>
+
+                    <DataGridTextColumn
+                        Header="Movie Title"
+                        Binding="{Binding Title}"
+                        Width="*"/>
+
+                    <DataGridTextColumn
+                        Header="Genre"
+                        Binding="{Binding Genre}"
+                        Width="160"/>
+
+                    <DataGridTextColumn
+                        Header="Duration (min)"
+                        Binding="{Binding DurationMinutes}"
+                        Width="150"/>
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
     </Grid>
 </UserControl>
