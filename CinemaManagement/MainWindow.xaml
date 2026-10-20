@@ -7,59 +7,54 @@
         MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen"
         Background="#F5F6FA">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
-        <!-- Header -->
         <Border Grid.Row="0" Background="#1E293B">
             <Grid Margin="25,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
                 <TextBlock Text="CINEMA MANAGEMENT"
-                           FontSize="24"
-                           FontWeight="Bold"
-                           Foreground="White"
-                           VerticalAlignment="Center"/>
-
-                <TextBlock Text="GROUP 2 - PRN212"
-                           FontSize="14"
-                           Foreground="White"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"/>
+                           FontSize="24" FontWeight="Bold"
+                           Foreground="White" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <TextBlock x:Name="CurrentUserText"
+                               Foreground="White" FontSize="14"
+                               VerticalAlignment="Center" Margin="0,0,15,0"/>
+                    <Button Content="Sign Out" Click="SignOutButton_Click"
+                            Padding="14,7" Background="#EF4444"
+                            Foreground="White" BorderThickness="0"
+                            Cursor="Hand"/>
+                </StackPanel>
             </Grid>
         </Border>
-
-        <!-- Main Content -->
-        <TabControl Grid.Row="1"
-                    Margin="15"
-                    FontSize="15">
-
-            <TabItem Header="Showtimes">
+        <TabControl x:Name="MainTabControl" Grid.Row="1" Margin="15" FontSize="15">
+            <TabItem x:Name="BrowseMoviesTab" Header="Browse Movies">
+                <views:BrowseMoviesView/>
+            </TabItem>
+            <TabItem x:Name="ShowtimesTab" Header="Showtimes">
                 <views:ShowtimesView/>
             </TabItem>
-
-            <TabItem Header="Movies">
+            <TabItem x:Name="ManageMoviesTab" Header="Manage Movies">
                 <views:ManageMoviesView/>
             </TabItem>
-
-            <TabItem Header="Rooms &amp; Seats">
+            <TabItem x:Name="RoomsSeatsTab" Header="Rooms &amp; Seats">
                 <views:RoomsSeatsView/>
             </TabItem>
-
-            <TabItem Header="Booking">
+            <TabItem x:Name="BookingTab" Header="Booking">
                 <views:BookingView/>
             </TabItem>
-
-            <TabItem Header="Payments">
+            <TabItem x:Name="PaymentsTab" Header="Payments">
                 <views:PaymentsView/>
             </TabItem>
-
-            <TabItem Header="Account">
+            <TabItem x:Name="AccountTab" Header="Account">
                 <views:AccountView/>
             </TabItem>
-
         </TabControl>
     </Grid>
 </Window>
