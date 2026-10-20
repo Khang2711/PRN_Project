@@ -38,7 +38,7 @@
                 <views:BrowseMoviesView/>
             </TabItem>
             <TabItem x:Name="ShowtimesTab" Header="Showtimes">
-                <views:ShowtimesView/>
+                <views:ShowtimesView x:Name="ShowtimesControl" />
             </TabItem>
             <TabItem x:Name="ManageMoviesTab" Header="Manage Movies">
                 <views:ManageMoviesView/>
@@ -47,7 +47,11 @@
                 <views:RoomsSeatsView/>
             </TabItem>
             <TabItem x:Name="BookingTab" Header="Booking">
-                <views:BookingView/>
+                <views:BookingView x:Name="BookingControl"/>
+            </TabItem>
+
+            <TabItem x:Name="ViewBookingTab" Header="View Booking">
+                <views:ViewBookingView x:Name="ViewBookingControl"/>
             </TabItem>
             <TabItem x:Name="PaymentsTab" Header="Payments">
                 <views:PaymentsView/>
