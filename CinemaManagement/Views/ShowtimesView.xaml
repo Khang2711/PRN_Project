@@ -22,7 +22,9 @@
         </Grid.RowDefinitions>
 
         <!-- TITLE -->
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+        <StackPanel Grid.Row="0"
+                    Margin="0,0,0,20">
+
             <TextBlock Text="SHOWTIME MANAGEMENT"
                        FontSize="26"
                        FontWeight="Bold"
@@ -67,7 +69,7 @@
             </Grid>
         </Border>
 
-        <!-- CREATE SHOWTIME FORM -->
+        <!-- F23: CREATE SHOWTIME FORM -->
         <Border Grid.Row="2"
                 Background="White"
                 CornerRadius="8"
@@ -92,41 +94,53 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- MOVIE -->
-                    <StackPanel Grid.Column="0"
-                                Margin="0,0,10,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                        <TextBlock Text="Movie"
+                    <!-- MOVIE NAME -->
+                    <StackPanel Grid.Row="0"
+                                Grid.Column="0"
+                                Margin="0,0,10,15">
+
+                        <TextBlock Text="Movie Name"
                                    FontWeight="SemiBold"
                                    Margin="0,0,0,5"/>
 
-                        <ComboBox
+                        <TextBox
                             Height="35"
-                            ItemsSource="{Binding Movies}"
-                            SelectedItem="{Binding SelectedMovie,
-                                Mode=TwoWay}"/>
+                            Padding="8,5"
+                            FontSize="14"
+                            Text="{Binding MovieName,
+                                Mode=TwoWay,
+                                UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
 
-                    <!-- ROOM -->
-                    <StackPanel Grid.Column="1"
-                                Margin="0,0,10,0">
+                    <!-- ROOM NAME -->
+                    <StackPanel Grid.Row="0"
+                                Grid.Column="1"
+                                Margin="0,0,10,15">
 
-                        <TextBlock Text="Room"
+                        <TextBlock Text="Room Name"
                                    FontWeight="SemiBold"
                                    Margin="0,0,0,5"/>
 
-                        <ComboBox
+                        <TextBox
                             Height="35"
-                            ItemsSource="{Binding Rooms}"
-                            SelectedItem="{Binding SelectedRoom,
-                                Mode=TwoWay}"/>
+                            Padding="8,5"
+                            FontSize="14"
+                            Text="{Binding RoomName,
+                                Mode=TwoWay,
+                                UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
 
-                    <!-- DATE -->
-                    <StackPanel Grid.Column="2"
-                                Margin="0,0,10,0">
+                    <!-- SHOWTIME DATE -->
+                    <StackPanel Grid.Row="0"
+                                Grid.Column="2"
+                                Margin="0,0,10,15">
 
-                        <TextBlock Text="Date"
+                        <TextBlock Text="Showtime Date"
                                    FontWeight="SemiBold"
                                    Margin="0,0,0,5"/>
 
@@ -138,7 +152,9 @@
                     </StackPanel>
 
                     <!-- START TIME -->
-                    <StackPanel Grid.Column="3">
+                    <StackPanel Grid.Row="0"
+                                Grid.Column="3"
+                                Margin="0,0,0,15">
 
                         <TextBlock Text="Start Time"
                                    FontWeight="SemiBold"
@@ -146,13 +162,74 @@
 
                         <ComboBox
                             Height="35"
+                            FontSize="14"
                             ItemsSource="{Binding Times}"
                             SelectedItem="{Binding SelectedTime,
-                                Mode=TwoWay}"/>
+                                Mode=TwoWay,
+                                UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <!-- DURATION -->
+                    <StackPanel Grid.Row="1"
+                                Grid.Column="0"
+                                Margin="0,0,10,0">
+
+                        <TextBlock Text="Duration (Minutes)"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+
+                        <TextBox
+                            Height="35"
+                            Padding="8,5"
+                            FontSize="14"
+                            Text="{Binding DurationText,
+                                Mode=TwoWay,
+                                UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <!-- TICKET PRICE -->
+                    <StackPanel Grid.Row="1"
+                                Grid.Column="1"
+                                Margin="0,0,10,0">
+
+                        <TextBlock Text="Ticket Price (VND)"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+
+                        <TextBox
+                            Height="35"
+                            Padding="8,5"
+                            FontSize="14"
+                            Text="{Binding PriceText,
+                                Mode=TwoWay,
+                                UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <!-- AUTOMATIC END TIME -->
+                    <StackPanel Grid.Row="1"
+                                Grid.Column="2"
+                                Grid.ColumnSpan="2">
+
+                        <TextBlock Text="End Time (Automatic)"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+
+                        <Border Background="#DCFCE7"
+                                CornerRadius="5"
+                                Height="35"
+                                Padding="10,0">
+
+                            <TextBlock
+                                Text="{Binding EndTimePreview}"
+                                Foreground="#166534"
+                                FontSize="14"
+                                FontWeight="Bold"
+                                VerticalAlignment="Center"/>
+                        </Border>
                     </StackPanel>
                 </Grid>
 
-                <!-- ACTION BUTTONS -->
+                <!-- FORM BUTTONS -->
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Right"
                             Margin="0,20,0,0">
@@ -176,7 +253,6 @@
                             BorderThickness="0"
                             Cursor="Hand"
                             Command="{Binding CreateShowtimeCommand}"/>
-
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -208,7 +284,7 @@
                     <DataGridTextColumn
                         Header="ID"
                         Binding="{Binding ShowtimeId}"
-                        Width="60"/>
+                        Width="50"/>
 
                     <DataGridTextColumn
                         Header="Movie"
@@ -218,30 +294,35 @@
                     <DataGridTextColumn
                         Header="Room"
                         Binding="{Binding RoomName}"
-                        Width="110"/>
+                        Width="100"/>
 
                     <DataGridTextColumn
                         Header="Start Time"
                         Binding="{Binding StartTime,
                             StringFormat=dd/MM/yyyy HH:mm}"
-                        Width="155"/>
+                        Width="150"/>
+
+                    <DataGridTextColumn
+                        Header="Duration (min)"
+                        Binding="{Binding DurationMinutes}"
+                        Width="115"/>
 
                     <DataGridTextColumn
                         Header="End Time"
                         Binding="{Binding EndTime,
                             StringFormat=dd/MM/yyyy HH:mm}"
-                        Width="155"/>
+                        Width="150"/>
 
                     <DataGridTextColumn
                         Header="Price (VND)"
                         Binding="{Binding TicketPrice,
                             StringFormat=N0}"
-                        Width="120"/>
+                        Width="110"/>
 
                     <DataGridTextColumn
                         Header="Status"
                         Binding="{Binding Status}"
-                        Width="110"/>
+                        Width="100"/>
 
                 </DataGrid.Columns>
             </DataGrid>

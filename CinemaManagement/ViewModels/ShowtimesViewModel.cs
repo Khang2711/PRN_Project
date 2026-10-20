@@ -12,38 +12,71 @@ namespace CinemaManagement.ViewModels
 {
     public class ShowtimesViewModel : BaseViewModel
     {
-        // F24: Danh sách suất chiếu
-        public ObservableCollection<Showtime> Showtimes { get; set; }
+        // F24: Danh sach suat chieu
+        public ObservableCollection<Showtime> Showtimes
+        { get; set; }
 
-        // Danh sách phim và phòng mẫu
-        public ObservableCollection<string> Movies { get; set; }
-        public ObservableCollection<string> Rooms { get; set; }
-        public ObservableCollection<string> Times { get; set; }
+        // Danh sach gio bat dau
+        public ObservableCollection<string> Times
+        { get; set; }
 
-        // Thông tin tạo suất chiếu
-        private string _selectedMovie = "Avatar 3";
-        public string SelectedMovie
+        // F23: Nhap ten phim
+        private string _movieName = "";
+
+        public string MovieName
         {
-            get => _selectedMovie;
+            get => _movieName;
             set
             {
-                _selectedMovie = value;
+                _movieName = value;
                 OnPropertyChanged();
             }
         }
 
-        private string _selectedRoom = "Room 01";
-        public string SelectedRoom
+        // Nhap ten phong
+        private string _roomName = "";
+
+        public string RoomName
         {
-            get => _selectedRoom;
+            get => _roomName;
             set
             {
-                _selectedRoom = value;
+                _roomName = value;
                 OnPropertyChanged();
             }
         }
 
-        private DateTime? _selectedDate = DateTime.Today.AddDays(1);
+        // Nhap thoi luong phim (phut)
+        private string _durationText = "";
+
+        public string DurationText
+        {
+            get => _durationText;
+            set
+            {
+                _durationText = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(EndTimePreview));
+            }
+        }
+
+        // Nhap gia ve
+        private string _priceText = "";
+
+        public string PriceText
+        {
+            get => _priceText;
+            set
+            {
+                _priceText = value;
+                OnPropertyChanged();
+            }
+        }
+
+        // Chon ngay chieu
+        private DateTime? _selectedDate =
+            DateTime.Today.AddDays(1);
+
         public DateTime? SelectedDate
         {
             get => _selectedDate;
@@ -51,10 +84,13 @@ namespace CinemaManagement.ViewModels
             {
                 _selectedDate = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(EndTimePreview));
             }
         }
 
+        // Chon gio bat dau
         private string _selectedTime = "19:00";
+
         public string SelectedTime
         {
             get => _selectedTime;
@@ -62,10 +98,29 @@ namespace CinemaManagement.ViewModels
             {
                 _selectedTime = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(EndTimePreview));
             }
         }
 
-        // Hiển thị form tạo suất chiếu
+        // Tu dong tinh gio ket thuc
+        public string EndTimePreview
+        {
+            get
+            {
+                if (TryCalculateTimes(
+                    out DateTime start,
+                    out DateTime end))
+                {
+                    return end.ToString(
+                        "dd/MM/yyyy HH:mm",
+                        CultureInfo.InvariantCulture);
+                }
+
+                return "Enter a valid duration";
+            }
+        }
+
+        // Hien thi form them suat chieu
         private bool _isCreateFormVisible;
 
         public bool IsCreateFormVisible
@@ -80,37 +135,22 @@ namespace CinemaManagement.ViewModels
 
         // Commands
         public ICommand ShowCreateFormCommand { get; }
+
         public ICommand CreateShowtimeCommand { get; }
 
         public ShowtimesViewModel()
         {
             Showtimes = new ObservableCollection<Showtime>();
 
-            Movies = new ObservableCollection<string>
-            {
-                "Avatar 3",
-                "Doraemon",
-                "Conan Movie",
-                "Avengers"
-            };
-
-            Rooms = new ObservableCollection<string>
-            {
-                "Room 01",
-                "Room 02",
-                "Room 03"
-            };
-
             Times = new ObservableCollection<string>();
 
-            // Tạo các mốc giờ cách nhau 30 phút
+            // Tao gio bat dau cach nhau 30 phut
             for (int hour = 8; hour <= 23; hour++)
             {
                 Times.Add($"{hour:D2}:00");
                 Times.Add($"{hour:D2}:30");
             }
 
-            // Tạo Command
             ShowCreateFormCommand = new RelayCommand(
                 _ => IsCreateFormVisible = !IsCreateFormVisible
             );
@@ -119,11 +159,10 @@ namespace CinemaManagement.ViewModels
                 _ => CreateShowtime()
             );
 
-            // Dữ liệu mẫu
             LoadSampleData();
         }
 
-        // F24: Hiển thị dữ liệu cứng
+        // F24: Du lieu mau
         private void LoadSampleData()
         {
             DateTime tomorrow = DateTime.Today.AddDays(1);
@@ -134,7 +173,7 @@ namespace CinemaManagement.ViewModels
                 MovieTitle = "Avatar 3",
                 RoomName = "Room 01",
                 StartTime = tomorrow.AddHours(9),
-                EndTime = tomorrow.AddHours(12),
+                EndTime = tomorrow.AddHours(11),
                 TicketPrice = 90000,
                 Status = "Upcoming"
             });
@@ -173,86 +212,108 @@ namespace CinemaManagement.ViewModels
             });
         }
 
-        // F23: Tạo suất chiếu
+        // Tinh gio ket thuc tu thoi luong phim
+        private bool TryCalculateTimes(
+            out DateTime startTime,
+            out DateTime endTime)
+        {
+            startTime = default;
+            endTime = default;
+
+            if (SelectedDate == null)
+                return false;
+
+            if (!TimeSpan.TryParseExact(
+                SelectedTime,
+                @"hh\:mm",
+                CultureInfo.InvariantCulture,
+                out TimeSpan time))
+            {
+                return false;
+            }
+
+            if (!int.TryParse(
+                DurationText,
+                NumberStyles.None,
+                CultureInfo.InvariantCulture,
+                out int duration))
+            {
+                return false;
+            }
+
+            if (duration <= 0 || duration > 600)
+                return false;
+
+            startTime = SelectedDate.Value.Date.Add(time);
+
+            // Cong so phut vao gio bat dau
+            endTime = startTime.AddMinutes(duration);
+
+            return true;
+        }
+
+        // F23: Tao suat chieu
         private void CreateShowtime()
         {
-            // Kiểm tra dữ liệu
-            if (string.IsNullOrWhiteSpace(SelectedMovie) ||
-                string.IsNullOrWhiteSpace(SelectedRoom) ||
-                SelectedDate == null ||
-                string.IsNullOrWhiteSpace(SelectedTime))
+            // Kiem tra ten phim va phong
+            if (string.IsNullOrWhiteSpace(MovieName) ||
+                string.IsNullOrWhiteSpace(RoomName))
             {
                 MessageBox.Show(
-                    "Please fill in all fields!",
+                    "Please enter movie name and room name!",
                     "Validation Error",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Warning
-                );
+                    MessageBoxImage.Warning);
                 return;
             }
 
-            // Chuyển giờ dạng HH:mm thành TimeSpan
-            if (!DateTime.TryParseExact(
-                    SelectedTime,
-                    "HH:mm",
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.None,
-                    out DateTime parsedTime))
+            // Kiem tra thoi luong va ngay gio
+            if (!TryCalculateTimes(
+                out DateTime startTime,
+                out DateTime endTime))
             {
-                MessageBox.Show("Invalid time!");
+                MessageBox.Show(
+                    "Please select a valid date/time and " +
+                    "enter a duration from 1 to 600 minutes!",
+                    "Validation Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 return;
             }
 
-            DateTime startTime =
-                SelectedDate.Value.Date.Add(parsedTime.TimeOfDay);
+            // Kiem tra gia ve
+            if (!decimal.TryParse(
+                PriceText,
+                NumberStyles.Number,
+                CultureInfo.InvariantCulture,
+                out decimal price) || price <= 0)
+            {
+                MessageBox.Show(
+                    "Please enter a valid ticket price!",
+                    "Validation Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
 
+            // Khong cho tao suat chieu trong qua khu
             if (startTime <= DateTime.Now)
             {
                 MessageBox.Show(
                     "Showtime must be in the future!",
-                    "Validation Error"
-                );
+                    "Validation Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 return;
             }
 
-            // Thời lượng và giá vé mẫu
-            int duration;
-            decimal price;
+            string room = RoomName.Trim();
 
-            switch (SelectedMovie)
-            {
-                case "Avatar 3":
-                    duration = 180;
-                    price = 90000;
-                    break;
-
-                case "Doraemon":
-                    duration = 120;
-                    price = 70000;
-                    break;
-
-                case "Conan Movie":
-                    duration = 120;
-                    price = 80000;
-                    break;
-
-                case "Avengers":
-                    duration = 180;
-                    price = 100000;
-                    break;
-
-                default:
-                    MessageBox.Show("Invalid movie!");
-                    return;
-            }
-
-            DateTime endTime = startTime.AddMinutes(duration);
-
-            // Kiểm tra trùng lịch trong cùng phòng
-            // Cần 15 phút giữa hai suất để dọn phòng
+            // Kiem tra trung lich cung phong
+            // Them 15 phut de don dep phong
             bool isConflict = Showtimes.Any(s =>
                 s.RoomName.Equals(
-                    SelectedRoom,
+                    room,
                     StringComparison.OrdinalIgnoreCase) &&
                 startTime < s.EndTime.AddMinutes(15) &&
                 endTime.AddMinutes(15) > s.StartTime
@@ -261,42 +322,46 @@ namespace CinemaManagement.ViewModels
             if (isConflict)
             {
                 MessageBox.Show(
-                    "This room already has a conflicting showtime!" +
-                    "\nPlease choose another room or time.",
+                    "This room already has a conflicting " +
+                    "showtime!\nPlease choose another time or room.",
                     "Schedule Conflict",
                     MessageBoxButton.OK,
-                    MessageBoxImage.Warning
-                );
+                    MessageBoxImage.Warning);
                 return;
             }
 
-            // Tự tăng mã suất chiếu
+            // Tao ID moi
             int newId = Showtimes.Count == 0
                 ? 1
                 : Showtimes.Max(s => s.ShowtimeId) + 1;
 
+            // Tao doi tuong suat chieu
             Showtime newShowtime = new Showtime
             {
                 ShowtimeId = newId,
-                MovieTitle = SelectedMovie,
-                RoomName = SelectedRoom,
+                MovieTitle = MovieName.Trim(),
+                RoomName = room,
                 StartTime = startTime,
                 EndTime = endTime,
                 TicketPrice = price,
                 Status = "Upcoming"
             };
 
-            // Thêm vào danh sách
+            // Them vao danh sach
             Showtimes.Add(newShowtime);
 
             MessageBox.Show(
                 "Showtime created successfully!",
                 "Success",
                 MessageBoxButton.OK,
-                MessageBoxImage.Information
-            );
+                MessageBoxImage.Information);
 
-            // Đóng form
+            // Reset form
+            MovieName = "";
+            RoomName = "";
+            DurationText = "";
+            PriceText = "";
+
             IsCreateFormVisible = false;
         }
     }
