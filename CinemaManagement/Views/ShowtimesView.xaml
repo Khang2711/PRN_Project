@@ -4,6 +4,11 @@
              xmlns:vm="clr-namespace:CinemaManagement.ViewModels"
              Background="#F5F6FA">
 
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter
+            x:Key="BoolToVisibilityConverter"/>
+    </UserControl.Resources>
+
     <UserControl.DataContext>
         <vm:ShowtimesViewModel/>
     </UserControl.DataContext>
@@ -12,23 +17,25 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Title -->
+        <!-- TITLE -->
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
             <TextBlock Text="SHOWTIME MANAGEMENT"
                        FontSize="26"
                        FontWeight="Bold"
                        Foreground="#1E293B"/>
 
-            <TextBlock Text="Manage movie showtimes and ticket prices"
-                       FontSize="14"
-                       Foreground="Gray"
-                       Margin="0,5,0,0"/>
+            <TextBlock
+                Text="Manage movie showtimes and ticket prices"
+                FontSize="14"
+                Foreground="Gray"
+                Margin="0,5,0,0"/>
         </StackPanel>
 
-        <!-- Toolbar -->
+        <!-- TOOLBAR -->
         <Border Grid.Row="1"
                 Background="White"
                 CornerRadius="8"
@@ -55,30 +62,146 @@
                         Foreground="White"
                         BorderThickness="0"
                         FontWeight="Bold"
-                        Cursor="Hand"/>
+                        Cursor="Hand"
+                        Command="{Binding ShowCreateFormCommand}"/>
             </Grid>
         </Border>
 
-        <!-- Showtime Table -->
+        <!-- CREATE SHOWTIME FORM -->
         <Border Grid.Row="2"
+                Background="White"
+                CornerRadius="8"
+                Padding="20"
+                Margin="0,0,0,15"
+                Visibility="{Binding IsCreateFormVisible,
+                    Converter={StaticResource BoolToVisibilityConverter}}">
+
+            <StackPanel>
+
+                <TextBlock Text="CREATE NEW SHOWTIME"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           Foreground="#1E293B"
+                           Margin="0,0,0,15"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- MOVIE -->
+                    <StackPanel Grid.Column="0"
+                                Margin="0,0,10,0">
+
+                        <TextBlock Text="Movie"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+
+                        <ComboBox
+                            Height="35"
+                            ItemsSource="{Binding Movies}"
+                            SelectedItem="{Binding SelectedMovie,
+                                Mode=TwoWay}"/>
+                    </StackPanel>
+
+                    <!-- ROOM -->
+                    <StackPanel Grid.Column="1"
+                                Margin="0,0,10,0">
+
+                        <TextBlock Text="Room"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+
+                        <ComboBox
+                            Height="35"
+                            ItemsSource="{Binding Rooms}"
+                            SelectedItem="{Binding SelectedRoom,
+                                Mode=TwoWay}"/>
+                    </StackPanel>
+
+                    <!-- DATE -->
+                    <StackPanel Grid.Column="2"
+                                Margin="0,0,10,0">
+
+                        <TextBlock Text="Date"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+
+                        <DatePicker
+                            Height="35"
+                            SelectedDate="{Binding SelectedDate,
+                                Mode=TwoWay,
+                                UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+
+                    <!-- START TIME -->
+                    <StackPanel Grid.Column="3">
+
+                        <TextBlock Text="Start Time"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+
+                        <ComboBox
+                            Height="35"
+                            ItemsSource="{Binding Times}"
+                            SelectedItem="{Binding SelectedTime,
+                                Mode=TwoWay}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- ACTION BUTTONS -->
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            Margin="0,20,0,0">
+
+                    <Button Content="Cancel"
+                            Width="100"
+                            Height="38"
+                            Margin="0,0,10,0"
+                            Background="#E2E8F0"
+                            Foreground="#334155"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Command="{Binding ShowCreateFormCommand}"/>
+
+                    <Button Content="Save Showtime"
+                            Width="150"
+                            Height="38"
+                            Background="#16A34A"
+                            Foreground="White"
+                            FontWeight="Bold"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Command="{Binding CreateShowtimeCommand}"/>
+
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- F24: SHOWTIME LIST -->
+        <Border Grid.Row="3"
                 Background="White"
                 CornerRadius="8"
                 Padding="15">
 
-            <DataGrid ItemsSource="{Binding Showtimes}"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      SelectionMode="Single"
-                      GridLinesVisibility="Horizontal"
-                      HeadersVisibility="Column"
-                      RowHeight="45"
-                      ColumnHeaderHeight="45"
-                      FontSize="14"
-                      BorderThickness="0"
-                      Background="White"
-                      AlternatingRowBackground="#F1F5F9">
+            <DataGrid
+                ItemsSource="{Binding Showtimes}"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                CanUserAddRows="False"
+                CanUserDeleteRows="False"
+                SelectionMode="Single"
+                GridLinesVisibility="Horizontal"
+                HeadersVisibility="Column"
+                RowHeight="45"
+                ColumnHeaderHeight="45"
+                FontSize="14"
+                BorderThickness="0"
+                Background="White"
+                AlternatingRowBackground="#F1F5F9">
 
                 <DataGrid.Columns>
 
