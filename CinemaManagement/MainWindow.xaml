@@ -33,6 +33,7 @@
                 </StackPanel>
             </Grid>
         </Border>
+        
         <TabControl x:Name="MainTabControl" Grid.Row="1" Margin="15" FontSize="15">
             <TabItem x:Name="BrowseMoviesTab" Header="Browse Movies">
                 <views:BrowseMoviesView/>
