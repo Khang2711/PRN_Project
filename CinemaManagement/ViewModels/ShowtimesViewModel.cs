@@ -12,17 +12,28 @@ namespace CinemaManagement.ViewModels
 {
     public class ShowtimesViewModel : BaseViewModel
     {
-        // F24: Danh sach suat chieu
-        public ObservableCollection<Showtime> Showtimes
-        { get; set; }
+        public ObservableCollection<Showtime> Showtimes { get; set; }
+        public ObservableCollection<string> Times { get; set; }
 
-        // Danh sach gio bat dau
-        public ObservableCollection<string> Times
-        { get; set; }
+        // Phan quyen: chi Admin duoc quan ly suat chieu
+        private bool _canManageShowtimes = false;
 
-        // F23: Nhap ten phim
+        public bool CanManageShowtimes
+        {
+            get => _canManageShowtimes;
+            set
+            {
+                _canManageShowtimes = value;
+                OnPropertyChanged();
+
+                if (!value)
+                    IsCreateFormVisible = false;
+
+                CommandManager.InvalidateRequerySuggested();
+            }
+        }
+
         private string _movieName = "";
-
         public string MovieName
         {
             get => _movieName;
@@ -33,9 +44,7 @@ namespace CinemaManagement.ViewModels
             }
         }
 
-        // Nhap ten phong
         private string _roomName = "";
-
         public string RoomName
         {
             get => _roomName;
@@ -46,9 +55,7 @@ namespace CinemaManagement.ViewModels
             }
         }
 
-        // Nhap thoi luong phim (phut)
         private string _durationText = "";
-
         public string DurationText
         {
             get => _durationText;
@@ -60,9 +67,7 @@ namespace CinemaManagement.ViewModels
             }
         }
 
-        // Nhap gia ve
         private string _priceText = "";
-
         public string PriceText
         {
             get => _priceText;
@@ -73,10 +78,7 @@ namespace CinemaManagement.ViewModels
             }
         }
 
-        // Chon ngay chieu
-        private DateTime? _selectedDate =
-            DateTime.Today.AddDays(1);
-
+        private DateTime? _selectedDate = DateTime.Today.AddDays(1);
         public DateTime? SelectedDate
         {
             get => _selectedDate;
@@ -88,9 +90,7 @@ namespace CinemaManagement.ViewModels
             }
         }
 
-        // Chon gio bat dau
         private string _selectedTime = "19:00";
-
         public string SelectedTime
         {
             get => _selectedTime;
@@ -102,14 +102,12 @@ namespace CinemaManagement.ViewModels
             }
         }
 
-        // Tu dong tinh gio ket thuc
         public string EndTimePreview
         {
             get
             {
-                if (TryCalculateTimes(
-                    out DateTime start,
-                    out DateTime end))
+                if (TryCalculateTimes(out DateTime start,
+                                      out DateTime end))
                 {
                     return end.ToString(
                         "dd/MM/yyyy HH:mm",
@@ -120,7 +118,6 @@ namespace CinemaManagement.ViewModels
             }
         }
 
-        // Hien thi form them suat chieu
         private bool _isCreateFormVisible;
 
         public bool IsCreateFormVisible
@@ -133,36 +130,36 @@ namespace CinemaManagement.ViewModels
             }
         }
 
-        // Commands
         public ICommand ShowCreateFormCommand { get; }
-
         public ICommand CreateShowtimeCommand { get; }
 
         public ShowtimesViewModel()
         {
             Showtimes = new ObservableCollection<Showtime>();
-
             Times = new ObservableCollection<string>();
 
-            // Tao gio bat dau cach nhau 30 phut
             for (int hour = 8; hour <= 23; hour++)
             {
                 Times.Add($"{hour:D2}:00");
                 Times.Add($"{hour:D2}:30");
             }
 
+            // Chi Admin moi duoc mo form
             ShowCreateFormCommand = new RelayCommand(
-                _ => IsCreateFormVisible = !IsCreateFormVisible
+                _ => IsCreateFormVisible = !IsCreateFormVisible,
+                _ => CanManageShowtimes
             );
 
+            // Chi Admin moi duoc tao suat chieu
             CreateShowtimeCommand = new RelayCommand(
-                _ => CreateShowtime()
+                _ => CreateShowtime(),
+                _ => CanManageShowtimes
             );
 
             LoadSampleData();
         }
 
-        // F24: Du lieu mau
+        // F24 - Du lieu mau
         private void LoadSampleData()
         {
             DateTime tomorrow = DateTime.Today.AddDays(1);
@@ -212,7 +209,7 @@ namespace CinemaManagement.ViewModels
             });
         }
 
-        // Tinh gio ket thuc tu thoi luong phim
+        // Tinh thoi gian ket thuc
         private bool TryCalculateTimes(
             out DateTime startTime,
             out DateTime endTime)
@@ -245,43 +242,44 @@ namespace CinemaManagement.ViewModels
                 return false;
 
             startTime = SelectedDate.Value.Date.Add(time);
-
-            // Cong so phut vao gio bat dau
             endTime = startTime.AddMinutes(duration);
 
             return true;
         }
 
-        // F23: Tao suat chieu
+        // F23 - Tao suat chieu
         private void CreateShowtime()
         {
-            // Kiem tra ten phim va phong
+            // Kiem tra quyen truoc khi xu ly
+            if (!CanManageShowtimes)
+            {
+                MessageBox.Show(
+                    "Only Admin can create showtimes!",
+                    "Access Denied",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(MovieName) ||
                 string.IsNullOrWhiteSpace(RoomName))
             {
                 MessageBox.Show(
                     "Please enter movie name and room name!",
-                    "Validation Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    "Validation Error");
                 return;
             }
 
-            // Kiem tra thoi luong va ngay gio
             if (!TryCalculateTimes(
                 out DateTime startTime,
                 out DateTime endTime))
             {
                 MessageBox.Show(
-                    "Please select a valid date/time and " +
-                    "enter a duration from 1 to 600 minutes!",
-                    "Validation Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    "Please enter a valid date, time and duration!",
+                    "Validation Error");
                 return;
             }
 
-            // Kiem tra gia ve
             if (!decimal.TryParse(
                 PriceText,
                 NumberStyles.Number,
@@ -290,27 +288,21 @@ namespace CinemaManagement.ViewModels
             {
                 MessageBox.Show(
                     "Please enter a valid ticket price!",
-                    "Validation Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    "Validation Error");
                 return;
             }
 
-            // Khong cho tao suat chieu trong qua khu
             if (startTime <= DateTime.Now)
             {
                 MessageBox.Show(
                     "Showtime must be in the future!",
-                    "Validation Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    "Validation Error");
                 return;
             }
 
             string room = RoomName.Trim();
 
-            // Kiem tra trung lich cung phong
-            // Them 15 phut de don dep phong
+            // Kiem tra trung lich, kem 15 phut don phong
             bool isConflict = Showtimes.Any(s =>
                 s.RoomName.Equals(
                     room,
@@ -322,20 +314,17 @@ namespace CinemaManagement.ViewModels
             if (isConflict)
             {
                 MessageBox.Show(
-                    "This room already has a conflicting " +
-                    "showtime!\nPlease choose another time or room.",
+                    "This room already has a conflicting showtime!",
                     "Schedule Conflict",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
             }
 
-            // Tao ID moi
             int newId = Showtimes.Count == 0
                 ? 1
                 : Showtimes.Max(s => s.ShowtimeId) + 1;
 
-            // Tao doi tuong suat chieu
             Showtime newShowtime = new Showtime
             {
                 ShowtimeId = newId,
@@ -347,7 +336,6 @@ namespace CinemaManagement.ViewModels
                 Status = "Upcoming"
             };
 
-            // Them vao danh sach
             Showtimes.Add(newShowtime);
 
             MessageBox.Show(
@@ -356,12 +344,10 @@ namespace CinemaManagement.ViewModels
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
 
-            // Reset form
             MovieName = "";
             RoomName = "";
             DurationText = "";
             PriceText = "";
-
             IsCreateFormVisible = false;
         }
     }

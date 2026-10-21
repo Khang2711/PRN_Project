@@ -25,13 +25,13 @@
         <StackPanel Grid.Row="0"
                     Margin="0,0,0,20">
 
-            <TextBlock Text="SHOWTIME MANAGEMENT"
+            <TextBlock Text="SHOWTIME SCHEDULE"
                        FontSize="26"
                        FontWeight="Bold"
                        Foreground="#1E293B"/>
 
             <TextBlock
-                Text="Manage movie showtimes and ticket prices"
+                Text="View movie showtimes and ticket information"
                 FontSize="14"
                 Foreground="Gray"
                 Margin="0,5,0,0"/>
@@ -56,6 +56,7 @@
                            Foreground="#334155"
                            VerticalAlignment="Center"/>
 
+                <!-- ONLY ADMIN CAN SEE ADD BUTTON -->
                 <Button Grid.Column="1"
                         Content="+ Add Showtime"
                         Width="150"
@@ -65,6 +66,8 @@
                         BorderThickness="0"
                         FontWeight="Bold"
                         Cursor="Hand"
+                        Visibility="{Binding CanManageShowtimes,
+                            Converter={StaticResource BoolToVisibilityConverter}}"
                         Command="{Binding ShowCreateFormCommand}"/>
             </Grid>
         </Border>
