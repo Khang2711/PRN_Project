@@ -1,9 +1,10 @@
-
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using CinemaManagement.Views;
+using System.Windows.Controls.Primitives;
+using CinemaManagement.Models;
 using CinemaManagement.ViewModels;
+using CinemaManagement.Views;
 
 namespace CinemaManagement;
 
@@ -12,54 +13,98 @@ public partial class MainWindow : Window
     private readonly string _username;
     private readonly string _role;
 
+    private readonly BookingViewModel _bookingViewModel;
+
     public MainWindow(string username, string role)
     {
         InitializeComponent();
 
-        // Lay thong tin tu LoginWindow
+        // Lấy thông tin từ LoginWindow.
         _username = username;
         _role = role;
 
-        // Hien thi tai khoan dang dang nhap
+        // Hiển thị tài khoản đang đăng nhập.
         CurrentUserText.Text = $"{_username} ({_role})";
 
-        // Kiem tra quyen Admin
+        // Booking và View Booking dùng chung ViewModel.
+        _bookingViewModel = new BookingViewModel(_username, _role);
+
+        BookingControl.DataContext = _bookingViewModel;
+        ViewBookingControl.DataContext = _bookingViewModel;
+
+        // Nhận sự kiện chọn dòng trong bảng Showtimes.
+        ShowtimesControl.AddHandler(
+            Selector.SelectionChangedEvent,
+            new SelectionChangedEventHandler(Showtime_SelectionChanged),
+            true
+        );
+
+        // Hai tab đặt vé chỉ dành cho khách hàng.
+        if (!_bookingViewModel.IsCustomer)
+        {
+            BookingTab.Visibility = Visibility.Collapsed;
+            ViewBookingTab.Visibility = Visibility.Collapsed;
+        }
+
+        // Kiểm tra quyền Admin.
         bool isAdmin = string.Equals(
             _role,
             "Admin",
             StringComparison.OrdinalIgnoreCase
         );
 
-        // Truyen quyen vao ShowtimesViewModel
+        // Truyền quyền quản lý suất chiếu vào ShowtimesViewModel.
         if (ShowtimesTab.Content is ShowtimesView showtimesView
             && showtimesView.DataContext is ShowtimesViewModel showtimesVM)
         {
             showtimesVM.CanManageShowtimes = isAdmin;
         }
 
-        // Phan quyen cac tab
+        // Phân quyền các tab.
         if (isAdmin)
         {
-            // Admin khong can Browse Movies trong ban demo
+            // Admin không cần Browse Movies trong bản demo.
             BrowseMoviesTab.Visibility = Visibility.Collapsed;
 
-            // Mo trang quan ly suat chieu
+            // Mở trang quản lý suất chiếu.
             MainTabControl.SelectedItem = ShowtimesTab;
         }
         else
         {
-            // User khong duoc truy cap chuc nang quan ly
+            // User không được truy cập chức năng quản lý.
             ManageMoviesTab.Visibility = Visibility.Collapsed;
             RoomsSeatsTab.Visibility = Visibility.Collapsed;
             PaymentsTab.Visibility = Visibility.Collapsed;
             AccountTab.Visibility = Visibility.Collapsed;
 
-            // User mo trang danh sach phim
+            // User mở trang danh sách phim.
             MainTabControl.SelectedItem = BrowseMoviesTab;
         }
     }
 
-    // Dang xuat
+    private void Showtime_SelectionChanged(
+        object sender,
+        SelectionChangedEventArgs e)
+    {
+        if (!_bookingViewModel.IsCustomer)
+        {
+            return;
+        }
+
+        if (e.OriginalSource is DataGrid grid
+            && grid.SelectedItem is Showtime showtime)
+        {
+            // Đưa thông tin suất chiếu đã chọn sang Booking.
+            _bookingViewModel.SelectedShowtime = showtime;
+
+            // Mở màn hình xác nhận đặt vé.
+            MainTabControl.SelectedItem = BookingTab;
+
+            // Cho phép lần sau bấm lại cùng dòng.
+            grid.SelectedItem = null;
+        }
+    }
+
     private void SignOutButton_Click(
         object sender,
         RoutedEventArgs e)
@@ -72,9 +117,11 @@ public partial class MainWindow : Window
         );
 
         if (result != MessageBoxResult.Yes)
+        {
             return;
+        }
 
-        // Quay lai LoginWindow
+        // Quay lại LoginWindow.
         var loginWindow = new LoginWindow();
 
         Application.Current.MainWindow = loginWindow;
