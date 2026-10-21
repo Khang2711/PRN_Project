@@ -9,9 +9,41 @@
              d:DesignHeight="500"
              d:DesignWidth="1000">
 
+
+
     <UserControl.DataContext>
         <vm:RoomsSeatsViewModel/>
     </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <Style x:Key="FormLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#334155"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="7,3"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="#CBD5E1"/>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="6,3"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="FormButton" TargetType="Button">
+            <Setter Property="MinWidth" Value="64"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="IsEnabled" Value="True"/>
+        </Style>
+    </UserControl.Resources>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -19,15 +51,14 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0"
-                    Margin="0,0,0,20">
-
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
             <TextBlock Text="ROOM &amp; SEAT MANAGEMENT"
                        FontSize="26"
                        FontWeight="Bold"
                        Foreground="#1E293B"/>
 
-            <TextBlock Text="Select a room to view its seats"
+            <TextBlock Text="Select a room to view its seats."
+                       TextWrapping="Wrap"
                        FontSize="14"
                        Foreground="Gray"
                        Margin="0,5,0,0"/>
@@ -49,17 +80,19 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Text="ROOM LIST"
+                    <TextBlock Grid.Row="0"
+                               Text="ROOM LIST"
                                FontSize="18"
                                FontWeight="Bold"
                                Foreground="#334155"/>
 
                     <StackPanel Grid.Row="1"
                                 Orientation="Horizontal"
-                                Margin="0,8,0,15">
+                                Margin="0,6,0,10">
 
                         <TextBlock Text="Total rooms: "
                                    Foreground="#64748B"/>
@@ -69,7 +102,65 @@
                                    Foreground="#334155"/>
                     </StackPanel>
 
-                    <DataGrid Grid.Row="2"
+                    <Border Grid.Row="2"
+                            Background="#F8FAFC"
+                            CornerRadius="6"
+                            Padding="10"
+                            Margin="0,0,0,12">
+
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Room Name"
+                                               Style="{StaticResource FormLabel}"/>
+
+                                    <TextBox x:Name="RoomNameInput"
+                                             MaxLength="50"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Room Type"
+                                               Style="{StaticResource FormLabel}"/>
+
+                                    <ComboBox x:Name="RoomTypeInput"
+                                              IsEditable="True">
+                                        <ComboBoxItem Content="Standard"/>
+                                        <ComboBoxItem Content="IMAX"/>
+                                        <ComboBoxItem Content="Couple"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
+                            <WrapPanel Margin="0,10,0,0">
+                                <CheckBox x:Name="RoomActiveInput"
+                                          Content="Active"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,16,0"
+                                          Foreground="#334155"/>
+
+                                <Button Content="Add"
+                                        Background="#2563EB"
+                                        Style="{StaticResource FormButton}"/>
+
+                                <Button Content="Edit"
+                                        Background="#475569"
+                                        Style="{StaticResource FormButton}"/>
+
+                                <Button Content="Delete"
+                                        Background="#DC2626"
+                                        Style="{StaticResource FormButton}"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <DataGrid Grid.Row="3"
+                              MinHeight="140"
                               ItemsSource="{Binding Rooms}"
                               SelectedItem="{Binding SelectedRoom, Mode=TwoWay}"
                               AutoGenerateColumns="False"
@@ -79,9 +170,10 @@
                               SelectionMode="Single"
                               SelectionUnit="FullRow"
                               GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#E2E8F0"
                               HeadersVisibility="Column"
-                              RowHeight="45"
-                              ColumnHeaderHeight="45"
+                              RowHeight="35"
+                              ColumnHeaderHeight="35"
                               FontSize="14"
                               BorderThickness="0"
                               Background="White"
@@ -113,17 +205,19 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Text="SEAT LIST"
+                    <TextBlock Grid.Row="0"
+                               Text="SEAT LIST"
                                FontSize="18"
                                FontWeight="Bold"
                                Foreground="#334155"/>
 
                     <StackPanel Grid.Row="1"
                                 Orientation="Horizontal"
-                                Margin="0,8,0,15">
+                                Margin="0,6,0,10">
 
                         <TextBlock Text="{Binding SelectedRoom.RoomName}"
                                    FontWeight="Bold"
@@ -137,7 +231,73 @@
                                    Foreground="#334155"/>
                     </StackPanel>
 
-                    <DataGrid Grid.Row="2"
+                    <Border Grid.Row="2"
+                            Background="#F8FAFC"
+                            CornerRadius="6"
+                            Padding="10"
+                            Margin="0,0,0,12">
+
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="1.4*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Seat Row"
+                                               Style="{StaticResource FormLabel}"/>
+
+                                    <TextBox x:Name="SeatRowInput"
+                                             MaxLength="5"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Seat Number"
+                                               Style="{StaticResource FormLabel}"/>
+
+                                    <TextBox x:Name="SeatNumberInput"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="4">
+                                    <TextBlock Text="Seat Type"
+                                               Style="{StaticResource FormLabel}"/>
+
+                                    <ComboBox x:Name="SeatTypeInput">
+                                        <ComboBoxItem Content="Standard"/>
+                                        <ComboBoxItem Content="VIP"/>
+                                        <ComboBoxItem Content="Couple"/>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
+                            <WrapPanel Margin="0,10,0,0">
+                                <CheckBox x:Name="SeatActiveInput"
+                                          Content="Active"
+                                          VerticalAlignment="Center"
+                                          Margin="0,0,16,0"
+                                          Foreground="#334155"/>
+
+                                <Button Content="Add"
+                                        Background="#2563EB"
+                                        Style="{StaticResource FormButton}"/>
+
+                                <Button Content="Edit"
+                                        Background="#475569"
+                                        Style="{StaticResource FormButton}"/>
+
+                                <Button Content="Delete"
+                                        Background="#DC2626"
+                                        Style="{StaticResource FormButton}"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <DataGrid Grid.Row="3"
+                              MinHeight="140"
                               ItemsSource="{Binding Seats}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
@@ -146,9 +306,10 @@
                               SelectionMode="Single"
                               SelectionUnit="FullRow"
                               GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#E2E8F0"
                               HeadersVisibility="Column"
-                              RowHeight="45"
-                              ColumnHeaderHeight="45"
+                              RowHeight="35"
+                              ColumnHeaderHeight="35"
                               FontSize="14"
                               BorderThickness="0"
                               Background="White"
