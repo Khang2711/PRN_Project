@@ -1,11 +1,9 @@
-
 using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using CinemaManagement.Data;
 using CinemaManagement.Helpers;
 using CinemaManagement.Models;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +39,7 @@ namespace CinemaManagement.ViewModels
 
         // Du lieu nhap vao form
         private string _movieName = "";
+
         public string MovieName
         {
             get => _movieName;
@@ -52,6 +51,7 @@ namespace CinemaManagement.ViewModels
         }
 
         private string _roomName = "";
+
         public string RoomName
         {
             get => _roomName;
@@ -63,6 +63,7 @@ namespace CinemaManagement.ViewModels
         }
 
         private string _durationText = "";
+
         public string DurationText
         {
             get => _durationText;
@@ -75,6 +76,7 @@ namespace CinemaManagement.ViewModels
         }
 
         private string _priceText = "";
+
         public string PriceText
         {
             get => _priceText;
@@ -86,6 +88,7 @@ namespace CinemaManagement.ViewModels
         }
 
         private DateTime? _selectedDate = DateTime.Today.AddDays(1);
+
         public DateTime? SelectedDate
         {
             get => _selectedDate;
@@ -98,6 +101,7 @@ namespace CinemaManagement.ViewModels
         }
 
         private string _selectedTime = "19:00";
+
         public string SelectedTime
         {
             get => _selectedTime;
@@ -172,7 +176,7 @@ namespace CinemaManagement.ViewModels
         {
             try
             {
-                using var db = new CinemaDbContext();
+                using var db = new CinemaManagementDbContext();
 
                 // JOIN Showtimes, Movies va Rooms
                 var data = (
@@ -185,12 +189,9 @@ namespace CinemaManagement.ViewModels
                     orderby s.StartTime, s.ShowtimeId
                     select new
                     {
-                        s.ShowtimeId,
-                        MovieTitle = m.Title,
-                        r.RoomName,
-                        s.StartTime,
-                        s.EndTime,
-                        s.TicketPrice
+                        Showtime = s,
+                        Movie = m,
+                        Room = r
                     }
                 ).ToList();
 
@@ -198,25 +199,10 @@ namespace CinemaManagement.ViewModels
 
                 foreach (var item in data)
                 {
-                    string status;
+                    item.Showtime.Movie = item.Movie;
+                    item.Showtime.Room = item.Room;
 
-                    if (item.EndTime <= DateTime.Now)
-                        status = "Finished";
-                    else if (item.StartTime <= DateTime.Now)
-                        status = "Showing";
-                    else
-                        status = "Upcoming";
-
-                    Showtimes.Add(new Showtime
-                    {
-                        ShowtimeId = item.ShowtimeId,
-                        MovieTitle = item.MovieTitle,
-                        RoomName = item.RoomName,
-                        StartTime = item.StartTime,
-                        EndTime = item.EndTime,
-                        TicketPrice = item.TicketPrice,
-                        Status = status
-                    });
+                    Showtimes.Add(item.Showtime);
                 }
             }
             catch (Exception ex)
@@ -324,7 +310,7 @@ namespace CinemaManagement.ViewModels
 
             try
             {
-                using var db = new CinemaDbContext();
+                using var db = new CinemaManagementDbContext();
 
                 // Tim phim trong bang Movies
                 var movie = db.Movies.FirstOrDefault(
@@ -399,7 +385,7 @@ namespace CinemaManagement.ViewModels
                 }
 
                 // Tao suat chieu trong database
-                var newShowtime = new DbShowtime
+                var newShowtime = new Showtime
                 {
                     MovieId = movie.MovieId,
                     RoomId = room.RoomId,

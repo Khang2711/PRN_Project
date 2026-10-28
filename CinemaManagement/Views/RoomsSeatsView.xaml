@@ -180,6 +180,7 @@
                               AlternatingRowBackground="#F1F5F9">
 
                         <DataGrid.Columns>
+
                             <DataGridTextColumn Header="ID"
                                                 Binding="{Binding RoomId}"
                                                 Width="60"/>
@@ -189,8 +190,9 @@
                                                 Width="*"/>
 
                             <DataGridTextColumn Header="Total Seats"
-                                                Binding="{Binding TotalSeats}"
+                                                Binding="{Binding Seats.Count}"
                                                 Width="100"/>
+
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -316,17 +318,27 @@
                               AlternatingRowBackground="#F1F5F9">
 
                         <DataGrid.Columns>
+
                             <DataGridTextColumn Header="ID"
                                                 Binding="{Binding SeatId}"
                                                 Width="70"/>
 
                             <DataGridTextColumn Header="Seat Label"
-                                                Binding="{Binding SeatLabel}"
-                                                Width="*"/>
+                                                Width="*">
+
+                                <DataGridTextColumn.Binding>
+                                    <MultiBinding StringFormat="{}{0}{1}">
+                                        <Binding Path="SeatRow"/>
+                                        <Binding Path="SeatNumber"/>
+                                    </MultiBinding>
+                                </DataGridTextColumn.Binding>
+
+                            </DataGridTextColumn>
 
                             <DataGridCheckBoxColumn Header="Active"
                                                     Binding="{Binding IsActive, Mode=OneWay}"
                                                     Width="90"/>
+
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

@@ -291,12 +291,12 @@
 
                     <DataGridTextColumn
                         Header="Movie"
-                        Binding="{Binding MovieTitle}"
+                        Binding="{Binding Movie.Title}"
                         Width="*"/>
 
                     <DataGridTextColumn
                         Header="Room"
-                        Binding="{Binding RoomName}"
+                        Binding="{Binding Room.RoomName}"
                         Width="100"/>
 
                     <DataGridTextColumn
@@ -307,7 +307,7 @@
 
                     <DataGridTextColumn
                         Header="Duration (min)"
-                        Binding="{Binding DurationMinutes}"
+                        Binding="{Binding Movie.DurationMinutes}"
                         Width="115"/>
 
                     <DataGridTextColumn
@@ -322,9 +322,9 @@
                             StringFormat=N0}"
                         Width="110"/>
 
-                    <DataGridTextColumn
-                        Header="Status"
-                        Binding="{Binding Status}"
+                    <DataGridCheckBoxColumn
+                        Header="Active"
+                        Binding="{Binding IsActive, Mode=OneWay}"
                         Width="100"/>
 
                 </DataGrid.Columns>

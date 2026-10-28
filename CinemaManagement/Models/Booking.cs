@@ -1,24 +1,39 @@
+﻿using System;
+using System.Collections.Generic;
+
 namespace CinemaManagement.Models;
 
-public class Booking
+public partial class Booking
 {
-    public string BookingCode { get; set; } = "";
+    public int BookingId { get; set; }
 
-    public string CustomerUsername { get; set; } = "";
+    public string BookingCode { get; set; } = null!;
+
+    public int CustomerId { get; set; }
 
     public int ShowtimeId { get; set; }
 
-    public string MovieTitle { get; set; } = "";
+    public DateTime BookingTime { get; set; }
 
-    public string RoomName { get; set; } = "";
+    public string Status { get; set; } = null!;
 
-    public DateTime StartTime { get; set; }
+    public bool IsCancelled { get; set; }
 
-    public decimal TicketPrice { get; set; }
+    public string PaymentStatus { get; set; } = null!;
 
-    public DateTime CreatedAt { get; set; }
+    public decimal? PaidAmount { get; set; }
 
-    public string SeatLabel { get; set; } = "Not selected";
+    public DateTime? PaidAt { get; set; }
 
-    public string Status { get; set; } = "Unpaid";
+    public int? ConfirmedByUserId { get; set; }
+
+    public string? Note { get; set; }
+
+    public virtual ICollection<BookingDetail> BookingDetails { get; set; } = new List<BookingDetail>();
+
+    public virtual User? ConfirmedByUser { get; set; }
+
+    public virtual User Customer { get; set; } = null!;
+
+    public virtual Showtime Showtime { get; set; } = null!;
 }

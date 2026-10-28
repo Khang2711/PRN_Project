@@ -1,5 +1,7 @@
 using CinemaManagement.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace CinemaManagement.ViewModels;
 
@@ -8,8 +10,6 @@ public class RoomsSeatsViewModel : BaseViewModel
     public ObservableCollection<Room> Rooms { get; }
 
     public ObservableCollection<Seat> Seats { get; }
-
-    private readonly List<Seat> _allSeats;
 
     private Room? _selectedRoom;
 
@@ -37,57 +37,42 @@ public class RoomsSeatsViewModel : BaseViewModel
     {
         Rooms = new ObservableCollection<Room>();
         Seats = new ObservableCollection<Seat>();
-        _allSeats = new List<Seat>();
 
-        Rooms.Add(new Room
+        try
         {
-            RoomId = 1,
-            RoomName = "Phòng 1",
-            TotalSeats = 80
-        });
+            using var db = new CinemaManagementDbContext();
 
-        Rooms.Add(new Room
-        {
-            RoomId = 2,
-            RoomName = "Phòng 2",
-            TotalSeats = 100
-        });
+            // Lay danh sach phong va ghe tu database
+            var data = (
+                from r in db.Rooms
+                    .Include("Seats")
+                    .AsNoTracking()
+                where r.IsActive
+                orderby r.RoomId
+                select r
+            ).ToList();
 
-        Rooms.Add(new Room
-        {
-            RoomId = 3,
-            RoomName = "Phòng 3",
-            TotalSeats = 120
-        });
+            Rooms.Clear();
 
-        CreateSampleSeats(1, 8, 10);
-        CreateSampleSeats(2, 10, 10);
-        CreateSampleSeats(3, 12, 10);
-
-        SelectedRoom = Rooms[0];
-    }
-
-    private void CreateSampleSeats(
-        int roomId,
-        int totalRows,
-        int seatsPerRow)
-    {
-        for (int row = 0; row < totalRows; row++)
-        {
-            char rowLabel = (char)('A' + row);
-
-            for (int number = 1; number <= seatsPerRow; number++)
+            foreach (Room room in data)
             {
-                Seat seat = new Seat
-                {
-                    SeatId = _allSeats.Count + 1,
-                    RoomId = roomId,
-                    SeatLabel = rowLabel.ToString() + number,
-                    IsActive = true
-                };
-
-                _allSeats.Add(seat);
+                Rooms.Add(room);
             }
+
+            if (Rooms.Count > 0)
+            {
+                SelectedRoom = Rooms[0];
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                "Cannot load rooms from database!\n\n"
+                + ex.GetBaseException().Message,
+                "Database Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 
@@ -100,12 +85,17 @@ public class RoomsSeatsViewModel : BaseViewModel
             return;
         }
 
-        foreach (Seat seat in _allSeats)
+        // Lay danh sach ghe cua phong duoc chon
+        var data = (
+            from s in SelectedRoom.Seats
+            where s.IsActive
+            orderby s.SeatRow, s.SeatNumber
+            select s
+        ).ToList();
+
+        foreach (Seat seat in data)
         {
-            if (seat.RoomId == SelectedRoom.RoomId)
-            {
-                Seats.Add(seat);
-            }
+            Seats.Add(seat);
         }
     }
 }

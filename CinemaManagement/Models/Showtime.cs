@@ -1,38 +1,27 @@
-﻿
-using System;
+﻿using System;
+using System.Collections.Generic;
 
-namespace CinemaManagement.Models
+namespace CinemaManagement.Models;
+
+public partial class Showtime
 {
-    public class Showtime
-    {
-        // Mã suất chiếu
-        public int ShowtimeId { get; set; }
+    public int ShowtimeId { get; set; }
 
-        // Tên phim
-        public string MovieTitle { get; set; } = "";
+    public int MovieId { get; set; }
 
-        // Tên phòng chiếu
-        public string RoomName { get; set; } = "";
+    public int RoomId { get; set; }
 
-        // Thời gian bắt đầu
-        public DateTime StartTime { get; set; }
+    public DateTime StartTime { get; set; }
 
-        // Thời gian kết thúc
-        public DateTime EndTime { get; set; }
+    public DateTime EndTime { get; set; }
 
-        // Thời lượng phim (phút)
-        public int DurationMinutes
-        {
-            get
-            {
-                return (int)(EndTime - StartTime).TotalMinutes;
-            }
-        }
+    public decimal TicketPrice { get; set; }
 
-        // Giá vé
-        public decimal TicketPrice { get; set; }
+    public bool IsActive { get; set; }
 
-        // Trạng thái suất chiếu
-        public string Status { get; set; } = "";
-    }
+    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
+    public virtual Movie Movie { get; set; } = null!;
+
+    public virtual Room Room { get; set; } = null!;
 }

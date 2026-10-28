@@ -1,7 +1,9 @@
-using System.Collections.ObjectModel;
-using System.Windows.Input;
 using CinemaManagement.Helpers;
 using CinemaManagement.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Input;
 
 namespace CinemaManagement.ViewModels;
 
@@ -91,8 +93,7 @@ public class BookingViewModel : BaseViewModel
             return;
         }
 
-        if (showtime.Status != "Upcoming"
-            && showtime.Status != "Scheduled")
+        if (!showtime.IsActive)
         {
             Message = "This showtime is not available for booking.";
             return;
@@ -104,40 +105,85 @@ public class BookingViewModel : BaseViewModel
             return;
         }
 
-        Booking booking = new Booking
+        try
         {
-            BookingCode = "BK" + (AllBookings.Count + 1).ToString("D4"),
+            using var db = new CinemaManagementDbContext();
 
-            CustomerUsername = Username,
+            // Tim khach hang trong database
+            var customer = (
+                from u in db.Users
+                where u.Username == Username && u.IsActive
+                select u
+            ).FirstOrDefault();
 
-            ShowtimeId = showtime.ShowtimeId,
+            if (customer == null)
+            {
+                Message = "Customer account does not exist in database.";
+                return;
+            }
 
-            MovieTitle = showtime.MovieTitle,
+            // Kiem tra suat chieu trong database
+            var selectedShowtime = (
+                from s in db.Showtimes
+                where s.ShowtimeId == showtime.ShowtimeId
+                      && s.IsActive
+                select s
+            ).FirstOrDefault();
 
-            RoomName = showtime.RoomName,
+            if (selectedShowtime == null ||
+                selectedShowtime.StartTime <= DateTime.Now)
+            {
+                Message = "This showtime is no longer available.";
+                return;
+            }
 
-            StartTime = showtime.StartTime,
+            // Tao booking moi
+            Booking booking = new Booking
+            {
+                BookingCode = "BK" +
+                    Guid.NewGuid().ToString("N")
+                        .Substring(0, 12).ToUpperInvariant(),
 
-            TicketPrice = showtime.TicketPrice,
+                CustomerId = customer.UserId,
 
-            CreatedAt = DateTime.Now,
+                ShowtimeId = selectedShowtime.ShowtimeId,
 
-            SeatLabel = "Not selected",
+                BookingTime = DateTime.Now,
 
-            Status = "Unpaid"
-        };
+                Status = "Pending",
 
-        AllBookings.Add(booking);
+                PaymentStatus = "Unpaid",
 
-        LoadMyBookings();
+                IsCancelled = false
+            };
 
-        // Ngăn bấm xác nhận liên tục tạo nhiều đơn.
-        _confirmed = true;
+            // Luu booking vao database
+            db.Bookings.Add(booking);
+            db.SaveChanges();
 
-        Message = "Saved " + booking.BookingCode
-            + ". Open View Booking to see your booking.";
+            // Load lai danh sach booking
+            LoadMyBookings();
 
-        CommandManager.InvalidateRequerySuggested();
+            // Ngăn bấm xác nhận liên tục tạo nhiều đơn.
+            _confirmed = true;
+
+            Message = "Saved " + booking.BookingCode
+                + ". Open View Booking to see your booking.";
+
+            CommandManager.InvalidateRequerySuggested();
+        }
+        catch (Exception ex)
+        {
+            Message = "Cannot save booking: "
+                + ex.GetBaseException().Message;
+
+            MessageBox.Show(
+                Message,
+                "Database Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+        }
     }
 
     private void LoadMyBookings()
@@ -149,16 +195,38 @@ public class BookingViewModel : BaseViewModel
             return;
         }
 
-        foreach (Booking booking in AllBookings)
+        try
         {
-            if (string.Equals(
-                booking.CustomerUsername,
-                Username,
-                StringComparison.OrdinalIgnoreCase))
+            using var db = new CinemaManagementDbContext();
+
+            // Lay booking cua khach hang tu database
+            var data = (
+                from b in db.Bookings
+                    .Include("Customer")
+                    .Include("Showtime.Movie")
+                    .Include("Showtime.Room")
+                    .AsNoTracking()
+                join u in db.Users.AsNoTracking()
+                    on b.CustomerId equals u.UserId
+                where u.Username == Username
+                orderby b.BookingTime descending
+                select b
+            ).ToList();
+
+            foreach (Booking booking in data)
             {
-                // Đơn mới nằm phía trên.
-                MyBookings.Insert(0, booking);
+                MyBookings.Add(booking);
             }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                "Cannot load bookings from database!\n\n"
+                + ex.GetBaseException().Message,
+                "Database Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
         }
     }
 }

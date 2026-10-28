@@ -52,8 +52,9 @@
                   IsReadOnly="True">
 
             <DataGrid.Columns>
+
                 <DataGridTextColumn Header="ID"
-                                    Binding="{Binding Id}"
+                                    Binding="{Binding MovieId}"
                                     Width="70"/>
 
                 <DataGridTextColumn Header="Movie Title"
@@ -67,8 +68,9 @@
                 <DataGridTextColumn Header="Duration"
                                     Binding="{Binding DurationMinutes}"
                                     Width="110"/>
+
             </DataGrid.Columns>
-            
+
         </DataGrid>
         
         

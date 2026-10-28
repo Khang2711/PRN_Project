@@ -1,9 +1,10 @@
 
+using CinemaManagement.Helpers;
+using CinemaManagement.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
-using CinemaManagement.Models;
-using CinemaManagement.Helpers;
 
 namespace CinemaManagement.ViewModels;
 
@@ -72,44 +73,37 @@ public class ManageMoviesViewModel : BaseViewModel
     // F12 - View Movies
     private void LoadMovies()
     {
-        // Thêm dữ liệu mẫu để kiểm tra chức năng F12
-        Movies.Add(new Movie
+        try
         {
-            Id = 1,
-            Title = "Hành Trình Ánh Sao",
-            Genre = "Phiêu lưu",
-            DurationMinutes = 120
-        });
+            using var db = new CinemaManagementDbContext();
 
-        Movies.Add(new Movie
+            // Lay danh sach phim tu database
+            var data = (
+                from m in db.Movies.AsNoTracking()
+                orderby m.MovieId
+                select m
+            ).ToList();
+
+            Movies.Clear();
+
+            foreach (Movie movie in data)
+            {
+                Movies.Add(movie);
+            }
+
+            // Cập nhật số lượng phim trên giao diện
+            OnPropertyChanged(nameof(TotalMovies));
+        }
+        catch (Exception ex)
         {
-            Id = 2,
-            Title = "Bí Mật Rạp Phim",
-            Genre = "Bí ẩn",
-            DurationMinutes = 105
-        });
-
-        Movies.Add(new Movie
-        {
-            Id = 3,
-            Title = "Mùa Hè Cuối",
-            Genre = "Tình cảm",
-            DurationMinutes = 98
-        });
-
-        Movies.Add(new Movie
-        {
-            Id = 4,
-            Title = "Thành Phố Ngủ Quên",
-            Genre = "Hành động",
-            DurationMinutes = 110
-        });
-
-        // Phim mới sẽ bắt đầu từ ID = 5
-        nextId = 5;
-
-        // Cập nhật số lượng phim trên giao diện
-        OnPropertyChanged(nameof(TotalMovies));
+            MessageBox.Show(
+                "Cannot load movies from database!\n\n"
+                + ex.GetBaseException().Message,
+                "Database Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+        }
     }
 
 
@@ -125,35 +119,52 @@ public class ManageMoviesViewModel : BaseViewModel
         }
 
         // Kiểm tra thời lượng phải là số dương
-        if (!int.TryParse(DurationInput, out int duration) ||
+        if (!short.TryParse(DurationInput, out short duration) ||
             duration <= 0)
         {
             MessageBox.Show("Duration must be a positive number.");
             return;
         }
 
-        // Tạo phim mới
-        Movie movie = new Movie
+        try
         {
-            Id = nextId,
-            Title = TitleInput.Trim(),
-            Genre = GenreInput.Trim(),
-            DurationMinutes = duration
-        };
+            using var db = new CinemaManagementDbContext();
 
-        // Thêm phim vào danh sách
-        Movies.Add(movie);
+            // Tạo phim mới
+            Movie movie = new Movie
+            {
+                Title = TitleInput.Trim(),
+                Genre = GenreInput.Trim(),
+                DurationMinutes = duration,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
 
-        OnPropertyChanged(nameof(TotalMovies));
+            // Thêm phim vào database
+            db.Movies.Add(movie);
+            db.SaveChanges();
 
-        // Tăng ID cho phim tiếp theo
-        nextId++;
+            // Cập nhật danh sách phim trên giao diện
+            Movies.Add(movie);
 
-        MessageBox.Show("Movie added successfully!");
+            OnPropertyChanged(nameof(TotalMovies));
 
-        // Xóa dữ liệu ở các ô nhập
-        TitleInput = "";
-        GenreInput = "";
-        DurationInput = "";
+            MessageBox.Show("Movie added successfully!");
+
+            // Xóa dữ liệu ở các ô nhập
+            TitleInput = "";
+            GenreInput = "";
+            DurationInput = "";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                "Cannot add movie!\n\n"
+                + ex.GetBaseException().Message,
+                "Database Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+        }
     }
 }
