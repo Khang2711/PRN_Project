@@ -24,6 +24,22 @@ public class BrowseMoviesViewModel : BaseViewModel
         }
     }
 
+    private Movie _selectedMovie;
+    public Movie selectedMovie
+    {
+        get { return _selectedMovie; }
+        set
+        {
+            _selectedMovie = value;
+            OnPropertyChanged(nameof(selectedMovie));
+        }
+    }
+
+    public BrowseMoviesViewModel()
+    {
+        Load();
+    }
+
     public void Load()
     {
         _allMovies.Clear();
@@ -53,8 +69,5 @@ public class BrowseMoviesViewModel : BaseViewModel
         }
     }
 
-    public BrowseMoviesViewModel()
-    {
-        Load();
-    }
+    
 }

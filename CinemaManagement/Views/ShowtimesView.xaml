@@ -4,9 +4,16 @@
              xmlns:vm="clr-namespace:CinemaManagement.ViewModels"
              Background="#F5F6FA">
 
+<<<<<<< Updated upstream
     <UserControl.DataContext>
         <vm:ShowtimesViewModel/>
     </UserControl.DataContext>
+=======
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter
+            x:Key="BoolToVisibilityConverter"/>
+    </UserControl.Resources>
+>>>>>>> Stashed changes
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
