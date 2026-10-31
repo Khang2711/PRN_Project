@@ -1,6 +1,8 @@
 using CinemaManagement.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows;
 
 
 namespace CinemaManagement.ViewModels;
@@ -42,14 +44,37 @@ public class BrowseMoviesViewModel : BaseViewModel
 
     public void Load()
     {
-        _allMovies.Clear();
+        try
+        {
+            using var db = new CinemaManagementDbContext();
 
-        _allMovies.Add(new Movie { Id = 1, Title = "Hành Trình Ánh Sao", Genre = "Phiêu lưu", DurationMinutes = 120 });
-        _allMovies.Add(new Movie { Id = 2, Title = "Bí Mật Rạp Phim", Genre = "Bí ẩn", DurationMinutes = 105 });
-        _allMovies.Add(new Movie { Id = 3, Title = "Mùa Hè Cuối", Genre = "Tình cảm", DurationMinutes = 98 });
-        _allMovies.Add(new Movie { Id = 4, Title = "Thành Phố Ngủ Quên", Genre = "Hành động", DurationMinutes = 110 });
+            // Lay danh sach phim dang hoat dong tu database
+            var data = (
+                from m in db.Movies.AsNoTracking()
+                where m.IsActive
+                orderby m.Title
+                select m
+            ).ToList();
 
-        SearchMovies();
+            _allMovies.Clear();
+
+            foreach (Movie movie in data)
+            {
+                _allMovies.Add(movie);
+            }
+
+            SearchMovies();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                "Cannot load movies from database!\n\n"
+                + ex.GetBaseException().Message,
+                "Database Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+        }
     }
 
     public void SearchMovies()

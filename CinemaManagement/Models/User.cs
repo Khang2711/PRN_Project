@@ -1,6 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+
 namespace CinemaManagement.Models;
 
-public class User
+public partial class User
 {
-    // TODO: Thêm các thuộc tính của User khi nhóm thống nhất CSDL.
+    public int UserId { get; set; }
+
+    public string Username { get; set; } = null!;
+
+    public string PasswordHash { get; set; } = null!;
+
+    public string FullName { get; set; } = null!;
+
+    public string? Email { get; set; }
+
+    public string? Phone { get; set; }
+
+    public string Role { get; set; } = null!;
+
+    public bool IsActive { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public virtual ICollection<Booking> BookingConfirmedByUsers { get; set; } = new List<Booking>();
+
+    public virtual ICollection<Booking> BookingCustomers { get; set; } = new List<Booking>();
+
+    public virtual ICollection<BookingDetail> BookingDetails { get; set; } = new List<BookingDetail>();
 }

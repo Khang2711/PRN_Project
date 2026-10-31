@@ -84,7 +84,7 @@
 
                     <DataGridTextColumn
                         Header="ID"
-                        Binding="{Binding Id}"
+                        Binding="{Binding MovieId}"
                         Width="70"/>
 
                     <DataGridTextColumn

@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=LAPTOP-6448FARN;Initial Catalog=CinemaManagementDB;Persist Security Info=True;User ID=sa;Password=123456;Encrypt=True;Trust Server Certificate=True"
+  }
+}
