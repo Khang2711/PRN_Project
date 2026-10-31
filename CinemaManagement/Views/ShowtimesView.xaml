@@ -9,9 +9,6 @@
             x:Key="BoolToVisibilityConverter"/>
     </UserControl.Resources>
 
-    <UserControl.DataContext>
-        <vm:ShowtimesViewModel/>
-    </UserControl.DataContext>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>

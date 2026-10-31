@@ -1,4 +1,7 @@
 
+using CinemaManagement.ViewModels;
+using System.ComponentModel;
+
 using System.Windows.Controls;
 using CinemaManagement.ViewModels;
 
@@ -10,6 +13,9 @@ public partial class ManageMoviesView : UserControl
     {
         InitializeComponent();
 
-        DataContext = new ManageMoviesViewModel();
+        if (!DesignerProperties.GetIsInDesignMode(this))
+        {
+            DataContext = new ViewModels.ManageMoviesViewModel();
+        }
     }
 }
