@@ -1,10 +1,9 @@
 <Window x:Class="CinemaManagement.LoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Sign In - Cinema Management"
-        Height="560" Width="900"
-        MinHeight="560" MinWidth="900"
-        ResizeMode="NoResize"
+        Title="Account - Cinema Management"
+        Height="700" Width="960"
+        MinHeight="650" MinWidth="900"
         WindowStartupLocation="CenterScreen"
         Background="#F5F6FA">
     <Grid>
@@ -13,7 +12,6 @@
             <ColumnDefinition Width="1.25*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Left brand panel, matching the application's navy header -->
         <Border Grid.Column="0" Background="#1E293B">
             <Grid Margin="42">
                 <Grid.RowDefinitions>
@@ -35,14 +33,14 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="1" VerticalAlignment="Center">
-                    <TextBlock Text="WELCOME BACK"
+                    <TextBlock Text="WELCOME TO CINEMA"
                                Foreground="#93C5FD" FontSize="13"
                                FontWeight="Bold" Margin="0,0,0,14"/>
                     <TextBlock Text="Your movie&#10;experience starts here."
                                Foreground="White" FontSize="31"
                                FontWeight="Bold" TextWrapping="Wrap"
                                LineHeight="39"/>
-                    <TextBlock Text="Sign in to browse movies, view showtimes, and manage your bookings."
+                    <TextBlock Text="Sign in to continue or create an account to start your movie experience."
                                Foreground="#CBD5E1" FontSize="15"
                                TextWrapping="Wrap" Margin="0,18,0,0"
                                LineHeight="24"/>
@@ -53,63 +51,111 @@
             </Grid>
         </Border>
 
-        <!-- Sign-in form -->
-        <Grid Grid.Column="1" Margin="48,40">
-            <Border Background="White" CornerRadius="12" Padding="34"
+        <Grid Grid.Column="1" Margin="38,28">
+            <Border Background="White" CornerRadius="12" Padding="28"
                     VerticalAlignment="Center">
                 <Border.Effect>
                     <DropShadowEffect Color="#CBD5E1" BlurRadius="20"
                                       ShadowDepth="3" Opacity="0.35"/>
                 </Border.Effect>
 
-                <StackPanel>
-                    <TextBlock Text="Sign In" FontSize="29"
-                               FontWeight="Bold" Foreground="#1E293B"/>
-                    <TextBlock Text="Enter your account details to continue."
-                               FontSize="14" Foreground="#64748B"
-                               Margin="0,8,0,28" TextWrapping="Wrap"/>
+                <TabControl x:Name="AccountTabControl" BorderThickness="0"
+                            FontSize="14">
+                    <TabItem Header="Sign In">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="8,22,8,8">
+                                <TextBlock Text="Welcome Back" FontSize="28"
+                                           FontWeight="Bold" Foreground="#1E293B"/>
+                                <TextBlock Text="Enter your account details to continue."
+                                           FontSize="14" Foreground="#64748B"
+                                           Margin="0,7,0,24"/>
 
-                    <TextBlock Text="Username" Foreground="#334155"
-                               FontWeight="SemiBold" Margin="0,0,0,8"/>
-                    <TextBox x:Name="UsernameTextBox" Height="42"
-                             Padding="12,8" FontSize="14"
-                             VerticalContentAlignment="Center"
-                             BorderBrush="#CBD5E1" BorderThickness="1"
-                             Margin="0,0,0,18"/>
+                                <TextBlock Text="Username" Foreground="#334155"
+                                           FontWeight="SemiBold" Margin="0,0,0,7"/>
+                                <TextBox x:Name="UsernameTextBox" Height="42"
+                                         Padding="12,8" FontSize="14"
+                                         VerticalContentAlignment="Center"
+                                         BorderBrush="#CBD5E1"
+                                         Margin="0,0,0,16"/>
 
-                    <TextBlock Text="Password" Foreground="#334155"
-                               FontWeight="SemiBold" Margin="0,0,0,8"/>
-                    <PasswordBox x:Name="PasswordBox" Height="42"
-                                 Padding="12,8" FontSize="14"
-                                 VerticalContentAlignment="Center"
-                                 BorderBrush="#CBD5E1" BorderThickness="1"
-                                 Margin="0,0,0,8"/>
+                                <TextBlock Text="Password" Foreground="#334155"
+                                           FontWeight="SemiBold" Margin="0,0,0,7"/>
+                                <PasswordBox x:Name="PasswordBox" Height="42"
+                                             Padding="12,8" FontSize="14"
+                                             VerticalContentAlignment="Center"
+                                             BorderBrush="#CBD5E1"
+                                             Margin="0,0,0,8"/>
 
-                    <TextBlock x:Name="ErrorText" Foreground="#DC2626"
-                               FontSize="13" TextWrapping="Wrap"
-                               MinHeight="22" Margin="0,0,0,10"/>
+                                <TextBlock x:Name="ErrorText" Foreground="#DC2626"
+                                           FontSize="12" TextWrapping="Wrap"
+                                           MinHeight="22" Margin="0,0,0,8"/>
 
-                    <Button Content="Sign In" Height="44"
-                            Click="SignInButton_Click"
-                            Background="#2563EB" Foreground="White"
-                            FontSize="15" FontWeight="Bold"
-                            BorderThickness="0" Cursor="Hand">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Background="{TemplateBinding Background}"
-                                        CornerRadius="6" Padding="10">
-                                    <ContentPresenter HorizontalAlignment="Center"
-                                                      VerticalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+                                <Button Content="Sign In" Height="44"
+                                        Click="SignInButton_Click"
+                                        Background="#2563EB" Foreground="White"
+                                        FontSize="15" FontWeight="Bold"
+                                        BorderThickness="0" Cursor="Hand"/>
+                                <TextBlock Text="Don't have an account? Choose Sign Up above."
+                                           Foreground="#64748B" FontSize="12"
+                                           TextWrapping="Wrap" Margin="0,18,0,0"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
 
-                    <TextBlock Text="Demo accounts: admin / admin123  •  user / user123"
-                               Foreground="#64748B" FontSize="11"
-                               TextWrapping="Wrap" Margin="0,20,0,0"
-                               HorizontalAlignment="Center"/>
-                </StackPanel>
+                    <TabItem Header="Sign Up">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="8,18,8,8">
+                                <TextBlock Text="Create Account" FontSize="28"
+                                           FontWeight="Bold" Foreground="#1E293B"/>
+                                <TextBlock Text="Register a new customer account."
+                                           FontSize="14" Foreground="#64748B"
+                                           Margin="0,7,0,18"/>
+
+                                <TextBlock Text="Full Name" Foreground="#334155"
+                                           FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBox x:Name="FullNameTextBox" Height="36"
+                                         Padding="10,6" Margin="0,0,0,10"/>
+
+                                <TextBlock Text="Username" Foreground="#334155"
+                                           FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBox x:Name="RegisterUsernameTextBox" Height="36"
+                                         Padding="10,6" Margin="0,0,0,10"/>
+
+                                <TextBlock Text="Email (optional)" Foreground="#334155"
+                                           FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBox x:Name="EmailTextBox" Height="36"
+                                         Padding="10,6" Margin="0,0,0,10"/>
+
+                                <TextBlock Text="Phone (optional)" Foreground="#334155"
+                                           FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <TextBox x:Name="PhoneTextBox" Height="36"
+                                         Padding="10,6" Margin="0,0,0,10"/>
+
+                                <TextBlock Text="Password" Foreground="#334155"
+                                           FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <PasswordBox x:Name="RegisterPasswordBox" Height="36"
+                                             Padding="10,6" Margin="0,0,0,10"/>
+
+                                <TextBlock Text="Confirm Password" Foreground="#334155"
+                                           FontWeight="SemiBold" Margin="0,0,0,5"/>
+                                <PasswordBox x:Name="ConfirmPasswordBox" Height="36"
+                                             Padding="10,6" Margin="0,0,0,8"/>
+
+                                <TextBlock x:Name="RegisterErrorText"
+                                           Foreground="#DC2626" FontSize="12"
+                                           TextWrapping="Wrap" MinHeight="22"
+                                           Margin="0,0,0,6"/>
+
+                                <Button Content="Create Account" Height="42"
+                                        Click="SignUpButton_Click"
+                                        Background="#2563EB" Foreground="White"
+                                        FontSize="14" FontWeight="Bold"
+                                        BorderThickness="0" Cursor="Hand"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
             </Border>
         </Grid>
     </Grid>
