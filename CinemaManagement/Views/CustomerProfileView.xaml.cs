@@ -46,6 +46,10 @@ public partial class CustomerProfileView : UserControl
             EmailTextBox.Text = _currentUser.Email ?? string.Empty;
             PhoneTextBox.Text = _currentUser.Phone ?? string.Empty;
             RoleTextBox.Text = _currentUser.Role;
+            ProfileNameText.Text = string.IsNullOrWhiteSpace(_currentUser.FullName)
+                ? _currentUser.Username : _currentUser.FullName;
+            ProfileUsernameText.Text = "@" + _currentUser.Username;
+            ProfileRoleText.Text = _currentUser.Role;
             StatusText.Text = string.Empty;
         }
         catch (Exception ex)
@@ -151,5 +155,8 @@ public partial class CustomerProfileView : UserControl
         EmailTextBox.Text = string.Empty;
         PhoneTextBox.Text = string.Empty;
         RoleTextBox.Text = string.Empty;
+        ProfileNameText.Text = "Customer";
+        ProfileUsernameText.Text = string.Empty;
+        ProfileRoleText.Text = "Customer";
     }
 }
