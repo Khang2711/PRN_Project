@@ -102,40 +102,72 @@
                         Binding="{Binding DurationMinutes}"
                         Width="130"/>
 
-                    <DataGridTemplateColumn Header="Action" Width="130">
 
+                    <DataGridTemplateColumn Header="Action" Width="275">
+                        
                         <DataGridTemplateColumn.CellTemplate>
+                           
                             <DataTemplate>
+                                
+                                <DataTemplate.Resources>
+                                    
+                                    <Style x:Key="RoundButton"
+                                           TargetType="Button">
+                                        <Setter Property="Foreground"
+                                                Value="White"/>
+                                        <Setter Property="BorderThickness"
+                                                Value="0"/>
+                                        <Setter Property="Padding"
+                                                Value="9,6"/>
+                                        <Setter Property="Margin"
+                                                Value="3"/>
+                                        <Setter Property="Cursor"
+                                                Value="Hand"/>
+                                        
+                                        <Setter Property="Template">
+                                           
+                                            <Setter.Value>
+                                                
+                                                <ControlTemplate TargetType="Button">
+                                                    
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            Padding="{TemplateBinding Padding}"
+                                                            CornerRadius="12">
+                                                        
+                                                        <ContentPresenter
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"/>
+                                                    
+                                                    </Border>
+                                                    
+                                                </ControlTemplate>
+                                                
+                                            </Setter.Value>
+                                            
+                                        </Setter>
+                                        
+                                    </Style>
+                                    
+                                </DataTemplate.Resources>
 
-                                <Button Content="Xem chi tiết"
-                                        CommandParameter="{Binding}"
-                                        Click="ViewDetails_Click"
-                                        Background="#2563EB"
-                                        Foreground="White"
-                                        BorderThickness="0"
-                                        Padding="8,5"
-                                        Margin="5,3"
-                                        Cursor="Hand">
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Center">
+                                    <!-- Detail button -->
+                                    <Button Content="Xem chi tiết"
+                                            Background="#2563EB"
+                                            Style="{StaticResource RoundButton}"
+                                            CommandParameter="{Binding}"
+                                            Click="ViewDetails_Click"/>
 
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    CornerRadius="12"
-                                                    Padding="{TemplateBinding Padding}">
-
-                                                <ContentPresenter
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center"/>
-
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-
-                                </Button>
-
+                                    <!-- Showtimes button -->
+                                    <Button Content="Xem lịch chiếu"
+                                            Background="#16A34A"
+                                            Style="{StaticResource RoundButton}"
+                                            CommandParameter="{Binding}"
+                                            Click="ViewShowtimes_Click"/>
+                                </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
-
                     </DataGridTemplateColumn>
 
                 </DataGrid.Columns>

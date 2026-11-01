@@ -1,0 +1,216 @@
+﻿<Window x:Class="CinemaManagement.Views.SeatAvailabilityWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CinemaManagement.Views"
+        mc:Ignorable="d"
+        Title="Seat Availability" Height="580" Width="720"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter
+            x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0"
+                    Margin="0,0,0,15">
+
+            <TextBlock Text="SEAT AVAILABILITY"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="#1E293B"/>
+
+            <TextBlock Text="{Binding MovieTitle}"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="#2563EB"
+                       Margin="0,8,0,5"/>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{Binding RoomName}"/>
+                <TextBlock Text="  |  "/>
+                <TextBlock
+                    Text="{Binding SelectedShowtime.StartTime,
+                           StringFormat='dd/MM/yyyy HH:mm'}"/>
+            </StackPanel>
+
+        </StackPanel>
+
+        
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    Margin="0,0,0,15">
+
+            <Border Width="18"
+                    Height="18"
+                    CornerRadius="4"
+                    Background="#16A34A"
+                    Margin="0,0,6,0"/>
+
+            <TextBlock Text="Còn trống"
+                       Margin="0,0,25,0"/>
+
+            <Border Width="18"
+                    Height="18"
+                    CornerRadius="4"
+                    Background="#DC2626"
+                    Margin="0,0,6,0"/>
+
+            <TextBlock Text="Đã đặt"/>
+        </StackPanel>
+
+
+        <Border Grid.Row="2"
+                Height="30"
+                Background="#CBD5E1"
+                CornerRadius="5"
+                Margin="30,0,30,20">
+
+            <TextBlock Text="MÀN HÌNH CHIẾU"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="#334155"
+                       FontWeight="SemiBold"/>
+
+        </Border>
+
+
+        <Border Grid.Row="3"
+                Background="White"
+                BorderBrush="#E2E8F0"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="15">
+
+            <Grid>
+
+                <ScrollViewer
+                    VerticalScrollBarVisibility="Auto">
+
+                    <ItemsControl ItemsSource="{Binding Seats}">
+
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel
+                                    HorizontalAlignment="Center"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+
+                                <Border Width="75"
+                                        Height="55"
+                                        Margin="5"
+                                        CornerRadius="8">
+
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+
+                                            <!-- Default is available -->
+                                            <Setter Property="Background"
+                                                    Value="#16A34A"/>
+
+                                            <Style.Triggers>
+
+                                                <!-- Booked -->
+                                                <DataTrigger
+                                                    Binding="{Binding IsBooked}"
+                                                    Value="True">
+
+                                                    <Setter
+                                                        Property="Background"
+                                                        Value="#DC2626"/>
+
+                                                </DataTrigger>
+
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+
+                                    <StackPanel
+                                        VerticalAlignment="Center">
+
+                                        <TextBlock
+                                            Text="{Binding SeatCode}"
+                                            Foreground="White"
+                                            FontWeight="Bold"
+                                            HorizontalAlignment="Center"/>
+
+                                        <TextBlock
+                                            Text="{Binding Status}"
+                                            Foreground="White"
+                                            FontSize="10"
+                                            HorizontalAlignment="Center"/>
+
+                                    </StackPanel>
+
+                                </Border>
+
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                </ScrollViewer>
+
+                <!-- Khi không có ghế -->
+                <TextBlock
+                    Text="Phòng này chưa có ghế đang hoạt động."
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Foreground="#64748B"
+                    IsHitTestVisible="False"
+                    Visibility="{Binding HasNoSeats,
+                        Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+            </Grid>
+        </Border>
+
+
+        <DockPanel Grid.Row="4"
+                   Margin="0,15,0,0"
+                   LastChildFill="False">
+
+            <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        DockPanel.Dock="Left">
+
+                <TextBlock Text="Tổng: "
+                           FontWeight="SemiBold"/>
+
+                <TextBlock Text="{Binding TotalSeats}"
+                           Margin="0,0,15,0"/>
+
+                <TextBlock Text="Trống: "
+                           FontWeight="SemiBold"/>
+
+                <TextBlock Text="{Binding AvailableSeats}"
+                           Margin="0,0,15,0"/>
+
+                <TextBlock Text="Đã đặt: "
+                           FontWeight="SemiBold"/>
+
+                <TextBlock Text="{Binding BookedSeats}"/>
+            </StackPanel>
+
+            <Button Content="Đóng"
+                    DockPanel.Dock="Right"
+                    Width="100"
+                    Height="35"
+                    Click="Close_Click"/>
+
+        </DockPanel>
+    </Grid>
+</Window>
