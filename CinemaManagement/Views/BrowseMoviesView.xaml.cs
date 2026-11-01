@@ -28,4 +28,17 @@ public partial class BrowseMoviesView : UserControl
 
         popup.ShowDialog();
     }
+
+    private void ViewShowtimes_Click(object sender, RoutedEventArgs e)
+    {
+        Button button = (Button)sender;
+
+        Movie movie = (Movie)button.CommandParameter;
+
+        MovieShowtimesWindow popup = new MovieShowtimesWindow(movie);
+
+        popup.Owner = Window.GetWindow(this);
+
+        popup.ShowDialog();
+    }
 }

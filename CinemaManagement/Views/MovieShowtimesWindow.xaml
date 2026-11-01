@@ -1,0 +1,186 @@
+﻿<Window x:Class="CinemaManagement.Views.MovieShowtimesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CinemaManagement.Views"
+        mc:Ignorable="d"
+        Title="View Showtimes" Height="510" Width="790"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter
+            x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <TextBlock Grid.Row="0"
+                   Text="MOVIE SHOWTIMES"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   Foreground="#1E293B"
+                   Margin="0,0,0,12"/>
+
+        <TextBlock Grid.Row="1"
+                   Text="{Binding selectedMovie.Title}"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   Foreground="#2563EB"
+                   Margin="0,0,0,15"/>
+
+        
+        <StackPanel Grid.Row="2"
+            Orientation="Horizontal"
+            VerticalAlignment="Center"
+            Margin="0,0,0,15">
+
+            <TextBlock Text="Lọc theo ngày (dd/MM/yyyy):"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center"
+               Margin="0,0,12,0"/>
+
+            <DatePicker Width="150"
+                        Height="25"
+                        Language="vi-VN"
+                        SelectedDateFormat="Short"
+                        SelectedDate="{Binding SelectedDate, Mode=TwoWay}"
+                        VerticalAlignment="Center">
+
+                <DatePicker.Resources>
+                    <Style TargetType="{x:Type DatePickerTextBox}">
+                        
+                        <Setter Property="IsReadOnly" Value="True"/>
+                        <Setter Property="Focusable" Value="False"/>
+
+                        
+                        <Setter Property="TextAlignment" Value="Center"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+
+                    </Style>
+                </DatePicker.Resources>
+
+            </DatePicker>
+
+            <Button Content="Clear"
+            Width="110"
+            Height="34"
+            Margin="12,0,0,0"
+            Click="ClearFilter_Click"/>
+        </StackPanel>
+
+
+        <Border Grid.Row="3"
+                Background="White"
+                CornerRadius="8"
+                Padding="10">
+            
+            <Grid>
+                
+                <DataGrid ItemsSource="{Binding Showtimes}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          HeadersVisibility="Column"
+                          AlternatingRowBackground="#F1F5F9"
+                          RowHeight="42"
+                          BorderThickness="0"
+                          GridLinesVisibility="Horizontal"
+                          VerticalGridLinesBrush="Transparent">
+
+                    <DataGrid.Columns>
+                        
+                        <DataGridTextColumn
+                            Header="ID"
+                            Binding="{Binding ShowtimeId}"
+                            Width="55"/>
+
+                        <DataGridTextColumn
+                            Header="Phòng"
+                            Binding="{Binding Room.RoomName}"
+                            Width="*"/>
+
+                        <DataGridTextColumn
+                            Header="Ngày chiếu"
+                            Binding="{Binding StartTime, StringFormat='dd/MM/yyyy'}"
+                            Width="110"/>
+                        
+                        <DataGridTextColumn
+                            Header="Bắt đầu"
+                            Binding="{Binding StartTime,
+                                StringFormat='HH:mm'}"
+                            Width="100"/>
+
+                        <DataGridTextColumn
+                            Header="Kết thúc"
+                            Binding="{Binding EndTime,
+                                StringFormat='HH:mm'}"
+                            Width="100"/>
+
+                        <DataGridTextColumn
+                            Header="Giá vé"
+                            Binding="{Binding TicketPrice,
+                                StringFormat=N0}"
+                            Width="110"/>
+
+                        <!-- Available Seats -->
+                        <DataGridTemplateColumn
+                            Header="Action"
+                            Width="125">
+                            
+                            <DataGridTemplateColumn.CellTemplate>
+                                
+                                <DataTemplate>
+                                    
+                                    <Button Content="Xem ghế"
+                                            CommandParameter="{Binding}"
+                                            Background="#16A34A"
+                                            Foreground="White"
+                                            Padding="8,5"
+                                            Margin="4"
+                                            BorderThickness="0"
+                                            Cursor="Hand"
+                                            Click="ViewSeats_Click"/>
+                                    
+                                </DataTemplate>
+                                
+                            </DataGridTemplateColumn.CellTemplate>
+                            
+                        </DataGridTemplateColumn>
+                        
+                    </DataGrid.Columns>
+                    
+                </DataGrid>
+
+                <TextBlock
+                        Text="Không có suất chiếu trong ngày này."
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Foreground="#64748B"
+                        IsHitTestVisible="False"
+                        Visibility="{Binding HasNoShowtimes,
+                        Converter={StaticResource BoolToVisibilityConverter}}"/>
+            </Grid>
+            
+        </Border>
+
+
+        <Button Grid.Row="4"
+                Content="Đóng"
+                Width="100"
+                Height="35"
+                HorizontalAlignment="Right"
+                Margin="0,15,0,0"
+                Click="Close_Click"/>
+    </Grid>
+</Window>
