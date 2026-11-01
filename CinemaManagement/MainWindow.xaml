@@ -33,7 +33,7 @@
                 </StackPanel>
             </Grid>
         </Border>
-        
+
         <TabControl x:Name="MainTabControl" Grid.Row="1" Margin="15" FontSize="15">
             <TabItem x:Name="BrowseMoviesTab" Header="Browse Movies">
                 <views:BrowseMoviesView/>
@@ -50,9 +50,11 @@
             <TabItem x:Name="BookingTab" Header="Booking">
                 <views:BookingView x:Name="BookingControl"/>
             </TabItem>
-
             <TabItem x:Name="ViewBookingTab" Header="View Booking">
                 <views:ViewBookingView x:Name="ViewBookingControl"/>
+            </TabItem>
+            <TabItem x:Name="CustomerProfileTab" Header="My Profile">
+                <views:CustomerProfileView x:Name="CustomerProfileControl"/>
             </TabItem>
             <TabItem x:Name="PaymentsTab" Header="Payments">
                 <views:PaymentsView/>
