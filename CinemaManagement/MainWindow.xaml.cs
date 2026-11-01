@@ -76,6 +76,7 @@ public partial class MainWindow : Window
             RoomsSeatsTab.Visibility = Visibility.Collapsed;
             PaymentsTab.Visibility = Visibility.Collapsed;
             AccountTab.Visibility = Visibility.Collapsed;
+            ShowtimesTab.Visibility = Visibility.Collapsed;
 
             // User mở trang danh sách phim.
             MainTabControl.SelectedItem = BrowseMoviesTab;
