@@ -24,6 +24,12 @@ public partial class MainWindow : Window
 
         CurrentUserText.Text = $"{_username} ({_role})";
 
+        if (string.Equals(_role, "Admin", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(_role, "Staff", StringComparison.OrdinalIgnoreCase))
+            PaymentsControl.DataContext = new PaymentsViewModel(_username);
+        if (string.Equals(_role, "Admin", StringComparison.OrdinalIgnoreCase))
+            AccountControl.DataContext = new AccountViewModel(_username);
+
         _bookingViewModel = new BookingViewModel(_username, _role);
 
         BookingControl.DataContext = _bookingViewModel;
@@ -58,7 +64,17 @@ public partial class MainWindow : Window
             showtimesVM.CanManageShowtimes = isAdmin;
         }
 
-        if (isAdmin)
+        bool isStaff = string.Equals(_role, "Staff", StringComparison.OrdinalIgnoreCase);
+
+        if (isStaff)
+        {
+            ManageMoviesTab.Visibility = Visibility.Collapsed;
+            RoomsSeatsTab.Visibility = Visibility.Collapsed;
+            AccountTab.Visibility = Visibility.Collapsed;
+            BrowseMoviesTab.Visibility = Visibility.Collapsed;
+            MainTabControl.SelectedItem = PaymentsTab;
+        }
+        else if (isAdmin)
         {
             BrowseMoviesTab.Visibility = Visibility.Collapsed;
             MainTabControl.SelectedItem = ShowtimesTab;
