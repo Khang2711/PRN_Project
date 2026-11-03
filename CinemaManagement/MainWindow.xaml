@@ -57,10 +57,10 @@
                 <views:CustomerProfileView x:Name="CustomerProfileControl"/>
             </TabItem>
             <TabItem x:Name="PaymentsTab" Header="Payments">
-                <views:PaymentsView/>
+                <views:PaymentsView x:Name="PaymentsControl"/>
             </TabItem>
             <TabItem x:Name="AccountTab" Header="Account">
-                <views:AccountView/>
+                <views:AccountView x:Name="AccountControl"/>
             </TabItem>
         </TabControl>
     </Grid>
