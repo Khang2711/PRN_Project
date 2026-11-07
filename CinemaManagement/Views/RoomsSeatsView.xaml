@@ -94,6 +94,12 @@
                         <TextBlock Text="{Binding Rooms.Count}"
                                    FontWeight="Bold"
                                    Foreground="#334155"/>
+
+                        <CheckBox Content="Show deleted rooms"
+                                  IsChecked="{Binding ShowDeletedRooms, Mode=TwoWay}"
+                                  Margin="18,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Foreground="#475569"/>
                     </StackPanel>
 
                     <Border Grid.Row="2"
@@ -154,6 +160,11 @@
         Background="#DC2626"
         Command="{Binding DeleteRoomCommand}"
         Style="{StaticResource FormButton}"/>
+
+                                <Button Content="Restore"
+        Background="#0F766E"
+        Command="{Binding RestoreRoomCommand}"
+        Style="{StaticResource FormButton}"/>
                             </WrapPanel>
                         </StackPanel>
                     </Border>
@@ -194,7 +205,11 @@
 
                             <DataGridTextColumn Header="Total Seats"
                                                 Binding="{Binding Seats.Count}"
-                                                Width="100"/>
+                                                Width="90"/>
+
+                            <DataGridCheckBoxColumn Header="Active"
+                                                    Binding="{Binding IsActive, Mode=OneWay}"
+                                                    Width="65"/>
 
                         </DataGrid.Columns>
                     </DataGrid>
