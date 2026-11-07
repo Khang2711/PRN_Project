@@ -186,7 +186,7 @@ public class RoomsSeatsViewModel : BaseViewModel
             using var db = new CinemaManagementDbContext();
 
             var data = db.Rooms
-                .Include(r => r.Seats)
+                .Include(r => r.Seats.Where(s => s.IsActive))
                 .AsNoTracking()
                 .Where(r => r.IsActive)
                 .OrderBy(r => r.RoomId)
@@ -418,7 +418,6 @@ public class RoomsSeatsViewModel : BaseViewModel
         }
     }
 
-
     private void AddSeat()
     {
         if (SelectedRoom == null)
@@ -459,7 +458,6 @@ public class RoomsSeatsViewModel : BaseViewModel
             int roomId = SelectedRoom.RoomId;
             string seatRow = SeatRowInput.Trim().ToUpper();
 
-            // Check whether this seat position already exists
             Seat? existingSeat = db.Seats.FirstOrDefault(s =>
                 s.RoomId == roomId &&
                 s.SeatRow == seatRow &&
@@ -468,7 +466,6 @@ public class RoomsSeatsViewModel : BaseViewModel
 
             if (existingSeat != null)
             {
-                // Seat is already active
                 if (existingSeat.IsActive)
                 {
                     MessageBox.Show(
@@ -481,7 +478,6 @@ public class RoomsSeatsViewModel : BaseViewModel
                     return;
                 }
 
-                // Ask whether to restore the deleted seat
                 MessageBoxResult result = MessageBox.Show(
                     "This seat was deleted before. Do you want to restore it?",
                     "Restore Seat",
@@ -505,7 +501,6 @@ public class RoomsSeatsViewModel : BaseViewModel
                 return;
             }
 
-            // Create a new seat if the position does not exist
             Seat seat = new Seat
             {
                 RoomId = roomId,
@@ -533,8 +528,6 @@ public class RoomsSeatsViewModel : BaseViewModel
             );
         }
     }
-
-
 
     private void EditSeat()
     {
@@ -589,10 +582,8 @@ public class RoomsSeatsViewModel : BaseViewModel
                 return;
             }
 
-            // Prepare the new seat position
             string newSeatRow = SeatRowInput.Trim().ToUpper();
 
-            // Check whether another seat already uses this position
             bool isDuplicate = db.Seats.Any(s =>
                 s.RoomId == SelectedRoom.RoomId &&
                 s.SeatRow == newSeatRow &&
@@ -613,10 +604,9 @@ public class RoomsSeatsViewModel : BaseViewModel
                 return;
             }
 
-            // Update seat information
             seat.SeatRow = newSeatRow;
             seat.SeatNumber = seatNumber;
-            seat.SeatType = SeatTypeInput;
+            seat.SeatType = SeatTypeInput.Trim();
             seat.IsActive = SeatActiveInput;
 
             db.SaveChanges();
@@ -641,6 +631,12 @@ public class RoomsSeatsViewModel : BaseViewModel
 
     private void DeleteSeat()
     {
+        if (SelectedRoom == null)
+        {
+            MessageBox.Show("Please select a room first!");
+            return;
+        }
+
         if (SelectedSeat == null)
         {
             MessageBox.Show("Please select a seat!");
@@ -677,7 +673,7 @@ public class RoomsSeatsViewModel : BaseViewModel
 
             db.SaveChanges();
 
-            int roomId = SelectedRoom!.RoomId;
+            int roomId = SelectedRoom.RoomId;
 
             MessageBox.Show("Seat deleted successfully!");
 
