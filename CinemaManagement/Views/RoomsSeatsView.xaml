@@ -188,6 +188,10 @@
                                                 Binding="{Binding RoomName}"
                                                 Width="*"/>
 
+                            <DataGridTextColumn Header="Room Type"
+                                                Binding="{Binding RoomType}"
+                                                Width="100"/>
+
                             <DataGridTextColumn Header="Total Seats"
                                                 Binding="{Binding Seats.Count}"
                                                 Width="100"/>
@@ -343,9 +347,13 @@
 
                             </DataGridTextColumn>
 
+                            <DataGridTextColumn Header="Seat Type"
+                                                Binding="{Binding SeatType}"
+                                                Width="100"/>
+
                             <DataGridCheckBoxColumn Header="Active"
                                                     Binding="{Binding IsActive, Mode=OneWay}"
-                                                    Width="90"/>
+                                                    Width="75"/>
 
                         </DataGrid.Columns>
                     </DataGrid>
