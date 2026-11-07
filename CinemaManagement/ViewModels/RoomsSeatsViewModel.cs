@@ -15,10 +15,26 @@ public class RoomsSeatsViewModel : BaseViewModel
     public ICommand AddRoomCommand { get; }
     public ICommand EditRoomCommand { get; }
     public ICommand DeleteRoomCommand { get; }
+    public ICommand RestoreRoomCommand { get; }
 
     public ICommand AddSeatCommand { get; }
     public ICommand EditSeatCommand { get; }
     public ICommand DeleteSeatCommand { get; }
+
+    private bool _showDeletedRooms;
+
+    public bool ShowDeletedRooms
+    {
+        get { return _showDeletedRooms; }
+        set
+        {
+            if (_showDeletedRooms == value) return;
+
+            _showDeletedRooms = value;
+            OnPropertyChanged();
+            LoadRooms(SelectedRoom?.RoomId);
+        }
+    }
 
     private Room? _selectedRoom;
 
@@ -171,6 +187,7 @@ public class RoomsSeatsViewModel : BaseViewModel
         AddRoomCommand = new RelayCommand(_ => AddRoom());
         EditRoomCommand = new RelayCommand(_ => EditRoom());
         DeleteRoomCommand = new RelayCommand(_ => DeleteRoom());
+        RestoreRoomCommand = new RelayCommand(_ => RestoreRoom());
 
         AddSeatCommand = new RelayCommand(_ => AddSeat());
         EditSeatCommand = new RelayCommand(_ => EditSeat());
@@ -188,7 +205,7 @@ public class RoomsSeatsViewModel : BaseViewModel
             var data = db.Rooms
                 .Include(r => r.Seats.Where(s => s.IsActive))
                 .AsNoTracking()
-                .Where(r => r.IsActive)
+                .Where(r => ShowDeletedRooms || r.IsActive)
                 .OrderBy(r => r.RoomId)
                 .ToList();
 
@@ -248,6 +265,29 @@ public class RoomsSeatsViewModel : BaseViewModel
         }
     }
 
+    private static bool HasCurrentOrUpcomingShowtimes(
+        CinemaManagementDbContext db,
+        int roomId)
+    {
+        DateTime now = DateTime.Now;
+
+        return db.Showtimes.Any(showtime =>
+            showtime.RoomId == roomId &&
+            showtime.IsActive &&
+            showtime.EndTime >= now);
+    }
+
+    private static bool HasNonCancelledBooking(
+        CinemaManagementDbContext db,
+        int seatId)
+    {
+        return db.BookingDetails.Any(detail =>
+            detail.SeatId == seatId &&
+            !detail.IsCancelled &&
+            !detail.Booking.IsCancelled &&
+            detail.Booking.Status != "Cancelled");
+    }
+
     private void AddRoom()
     {
         if (string.IsNullOrWhiteSpace(RoomNameInput))
@@ -268,9 +308,26 @@ public class RoomsSeatsViewModel : BaseViewModel
             return;
         }
 
+        if (RoomTypeInput.Trim().Length > 50)
+        {
+            MessageBox.Show("Room type cannot exceed 50 characters!");
+            return;
+        }
+
         try
         {
             using var db = new CinemaManagementDbContext();
+
+            string roomName = RoomNameInput.Trim();
+            if (db.Rooms.Any(r => r.RoomName == roomName))
+            {
+                MessageBox.Show(
+                    "A room with this name already exists!",
+                    "Duplicate Room",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
 
             Room room = new Room
             {
@@ -326,9 +383,28 @@ public class RoomsSeatsViewModel : BaseViewModel
             return;
         }
 
+        if (RoomTypeInput.Trim().Length > 50)
+        {
+            MessageBox.Show("Room type cannot exceed 50 characters!");
+            return;
+        }
+
         try
         {
             using var db = new CinemaManagementDbContext();
+
+            string roomName = RoomNameInput.Trim();
+            if (db.Rooms.Any(r =>
+                r.RoomName == roomName &&
+                r.RoomId != SelectedRoom.RoomId))
+            {
+                MessageBox.Show(
+                    "A room with this name already exists!",
+                    "Duplicate Room",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
 
             Room? room = db.Rooms.FirstOrDefault(
                 r => r.RoomId == SelectedRoom.RoomId
@@ -340,7 +416,18 @@ public class RoomsSeatsViewModel : BaseViewModel
                 return;
             }
 
-            room.RoomName = RoomNameInput.Trim();
+            if (room.IsActive && !RoomActiveInput &&
+                HasCurrentOrUpcomingShowtimes(db, room.RoomId))
+            {
+                MessageBox.Show(
+                    "This room cannot be deactivated because it has a current or upcoming showtime.",
+                    "Room In Use",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            room.RoomName = roomName;
             room.RoomType = RoomTypeInput.Trim();
             room.IsActive = RoomActiveInput;
 
@@ -398,6 +485,23 @@ public class RoomsSeatsViewModel : BaseViewModel
                 return;
             }
 
+            if (!room.IsActive)
+            {
+                MessageBox.Show("This room is already deleted. Use Restore to activate it again!");
+                return;
+            }
+
+            if (HasCurrentOrUpcomingShowtimes(db, room.RoomId))
+            {
+                MessageBox.Show(
+                    "This room cannot be deleted because it has a current or upcoming showtime. " +
+                    "Deactivate or reschedule those showtimes first.",
+                    "Room In Use",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
             room.IsActive = false;
 
             db.SaveChanges();
@@ -418,11 +522,78 @@ public class RoomsSeatsViewModel : BaseViewModel
         }
     }
 
+    private void RestoreRoom()
+    {
+        if (SelectedRoom == null)
+        {
+            MessageBox.Show("Please select a room!");
+            return;
+        }
+
+        if (SelectedRoom.IsActive)
+        {
+            MessageBox.Show("The selected room is already active!");
+            return;
+        }
+
+        MessageBoxResult result = MessageBox.Show(
+            "Do you want to restore this room?",
+            "Restore Room",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            using var db = new CinemaManagementDbContext();
+
+            Room? room = db.Rooms.FirstOrDefault(
+                r => r.RoomId == SelectedRoom.RoomId);
+
+            if (room == null)
+            {
+                MessageBox.Show("Room not found!");
+                return;
+            }
+
+            if (room.IsActive)
+            {
+                MessageBox.Show("This room is already active!");
+                LoadRooms(room.RoomId);
+                return;
+            }
+
+            room.IsActive = true;
+            db.SaveChanges();
+
+            MessageBox.Show("Room restored successfully!");
+            LoadRooms(room.RoomId);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                "Cannot restore room!\n\n" + ex.GetBaseException().Message,
+                "Database Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
     private void AddSeat()
     {
         if (SelectedRoom == null)
         {
             MessageBox.Show("Please select a room first!");
+            return;
+        }
+
+        if (!SelectedRoom.IsActive)
+        {
+            MessageBox.Show("Restore this room before managing its seats!");
             return;
         }
 
@@ -448,6 +619,12 @@ public class RoomsSeatsViewModel : BaseViewModel
         if (string.IsNullOrWhiteSpace(SeatTypeInput))
         {
             MessageBox.Show("Please select seat type!");
+            return;
+        }
+
+        if (SeatTypeInput.Trim().Length > 20)
+        {
+            MessageBox.Show("Seat type cannot exceed 20 characters!");
             return;
         }
 
@@ -490,7 +667,6 @@ public class RoomsSeatsViewModel : BaseViewModel
                     return;
                 }
 
-                existingSeat.SeatType = SeatTypeInput.Trim();
                 existingSeat.IsActive = true;
 
                 db.SaveChanges();
@@ -543,6 +719,12 @@ public class RoomsSeatsViewModel : BaseViewModel
             return;
         }
 
+        if (!SelectedRoom.IsActive)
+        {
+            MessageBox.Show("Restore this room before managing its seats!");
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(SeatRowInput))
         {
             MessageBox.Show("Please enter seat row!");
@@ -568,6 +750,12 @@ public class RoomsSeatsViewModel : BaseViewModel
             return;
         }
 
+        if (SeatTypeInput.Trim().Length > 20)
+        {
+            MessageBox.Show("Seat type cannot exceed 20 characters!");
+            return;
+        }
+
         try
         {
             using var db = new CinemaManagementDbContext();
@@ -579,6 +767,17 @@ public class RoomsSeatsViewModel : BaseViewModel
             if (seat == null)
             {
                 MessageBox.Show("Seat not found!");
+                return;
+            }
+
+            if (HasNonCancelledBooking(db, seat.SeatId))
+            {
+                MessageBox.Show(
+                    "This seat is linked to a non-cancelled booking and cannot be edited. " +
+                    "This protects existing ticket and booking records.",
+                    "Seat Already Booked",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 return;
             }
 
@@ -643,6 +842,12 @@ public class RoomsSeatsViewModel : BaseViewModel
             return;
         }
 
+        if (!SelectedRoom.IsActive)
+        {
+            MessageBox.Show("Restore this room before managing its seats!");
+            return;
+        }
+
         MessageBoxResult result = MessageBox.Show(
             "Are you sure you want to delete this seat?",
             "Confirm Delete",
@@ -666,6 +871,17 @@ public class RoomsSeatsViewModel : BaseViewModel
             if (seat == null)
             {
                 MessageBox.Show("Seat not found!");
+                return;
+            }
+
+            if (HasNonCancelledBooking(db, seat.SeatId))
+            {
+                MessageBox.Show(
+                    "This seat is linked to a non-cancelled booking and cannot be deleted. " +
+                    "This protects existing ticket and booking records.",
+                    "Seat Already Booked",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
                 return;
             }
 
