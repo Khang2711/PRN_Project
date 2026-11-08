@@ -8,11 +8,30 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <StackPanel Margin="0,0,0,15">
-            <TextBlock Text="VIEW BOOKING" FontSize="24" FontWeight="Bold"/>
-            <TextBlock Text="{Binding Username, StringFormat='Customer: {0}'}"
-                       Margin="0,8,0,0"/>
-        </StackPanel>
+
+        <Grid Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="VIEW BOOKING" FontSize="24" FontWeight="Bold"/>
+                <TextBlock Text="{Binding Username, StringFormat='Customer: {0}'}"
+                           Margin="0,8,0,0"/>
+            </StackPanel>
+            <Button Grid.Column="1"
+                    Content="↻  Refresh"
+                    Click="RefreshButton_Click"
+                    Width="110"
+                    Height="36"
+                    Margin="15,0,0,0"
+                    Background="#2563EB"
+                    Foreground="White"
+                    FontWeight="SemiBold"
+                    BorderThickness="0"
+                    Cursor="Hand"/>
+        </Grid>
+
         <TextBlock Grid.Row="1" Text="{Binding MyBookings.Count, StringFormat='Bookings: {0}'}"
                    Margin="0,0,0,15"/>
         <DataGrid Grid.Row="2" ItemsSource="{Binding MyBookings}"
