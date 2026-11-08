@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using CinemaManagement.ViewModels;
 
 namespace CinemaManagement.Views
 {
@@ -23,6 +24,14 @@ namespace CinemaManagement.Views
         public ViewBookingView()
         {
             InitializeComponent();
+        }
+
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is BookingViewModel viewModel)
+            {
+                viewModel.LoadMyBookings();
+            }
         }
     }
 }
