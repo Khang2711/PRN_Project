@@ -73,6 +73,11 @@ public partial class MainWindow : Window
         }
     }
 
+    public void RefreshCustomerBookings()
+    {
+        _bookingViewModel.LoadMyBookings();
+    }
+
     private void Showtime_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (!_bookingViewModel.IsCustomer) return;
