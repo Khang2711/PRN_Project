@@ -1,36 +1,43 @@
-﻿using CinemaManagement.Models;
+using CinemaManagement.Models;
 using CinemaManagement.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CinemaManagement.Views
 {
-    /// <summary>
-    /// Interaction logic for SeatAvailabilityWindow.xaml
-    /// </summary>
     public partial class SeatAvailabilityWindow : Window
     {
-        public SeatAvailabilityWindow(Showtime showtime, string movieTitle)
+        private readonly SeatAvailabilityViewModel _viewModel;
+
+        public SeatAvailabilityWindow(Showtime showtime, string movieTitle, string username)
         {
             InitializeComponent();
-            DataContext = new SeatAvailabilityViewModel(showtime, movieTitle);
+            _viewModel = new SeatAvailabilityViewModel(showtime, movieTitle, username);
+            DataContext = _viewModel;
         }
 
-        private void Close_Click(
-            object sender, RoutedEventArgs e)
+        private void Seat_Click(object sender, RoutedEventArgs e)
         {
-            Close();
+            if (sender is Button button && button.CommandParameter is SeatAvailabilityItem seat)
+                _viewModel.ToggleSeat(seat);
+        }
+
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel.LoadSeats();
+            _viewModel.Message = "Đã cập nhật trạng thái ghế.";
+        }
+
+        private void Book_Click(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel.CreateBooking())
+            {
+                MessageBox.Show(_viewModel.Message, "Đặt vé thành công", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show(_viewModel.Message, "Không thể đặt vé", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
     }
 }
