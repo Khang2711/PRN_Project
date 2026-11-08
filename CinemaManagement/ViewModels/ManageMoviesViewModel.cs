@@ -214,6 +214,7 @@ public class ManageMoviesViewModel : BaseViewModel
                 {
                     BookingCode = booking.BookingCode,
                     MovieTitle = booking.Showtime.Movie.Title,
+                    MovieId = booking.Showtime.MovieId,
                     PaymentDate = booking.PaidAt!.Value,
                     TicketCount = activeTickets.Count,
                     Revenue = activeTickets.Sum(detail => detail.PriceAtBooking)
@@ -243,15 +244,6 @@ public class ManageMoviesViewModel : BaseViewModel
                     Revenue = grouped.Sum(item => item.Revenue)
                 }
             ).ToList();
-
-            // Gán MovieId từ Showtime của booking tương ứng.
-            foreach (var summary in summaries)
-            {
-                var matchingBooking = bookings.FirstOrDefault(b =>
-                    b.Showtime.Movie.Title == summary.MovieTitle);
-                if (matchingBooking != null)
-                    summary.MovieId = matchingBooking.Showtime.MovieId;
-            }
 
             SalesSummary.Clear();
             foreach (var item in summaries)
@@ -346,6 +338,7 @@ public class PaidBookingReportItem
 {
     public string BookingCode { get; set; } = "";
     public string MovieTitle { get; set; } = "";
+    public int MovieId { get; set; }
     public DateTime PaymentDate { get; set; }
     public int TicketCount { get; set; }
     public decimal Revenue { get; set; }
