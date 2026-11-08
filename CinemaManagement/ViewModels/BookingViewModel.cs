@@ -186,7 +186,7 @@ public class BookingViewModel : BaseViewModel
         }
     }
 
-    private void LoadMyBookings()
+    public void LoadMyBookings()
     {
         MyBookings.Clear();
 
