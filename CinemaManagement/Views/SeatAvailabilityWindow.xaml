@@ -34,7 +34,7 @@
             <TextBlock Text="Còn trống" Margin="0,0,18,0"/>
             <Border Width="18" Height="18" CornerRadius="4" Background="#2563EB" Margin="0,0,6,0"/>
             <TextBlock Text="Đang chọn" Margin="0,0,18,0"/>
-            <Border Width="18" Height="18" CornerRadius="4" Background="#DC2626" Margin="0,0,6,0"/>
+            <Border Width="18" Height="18" CornerRadius="4" Background="#E2E8F0" Margin="0,0,6,0"/>
             <TextBlock Text="Đã đặt"/>
         </StackPanel>
 
