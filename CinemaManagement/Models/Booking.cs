@@ -28,8 +28,9 @@ public partial class Booking
     [NotMapped]
     public string SeatSummary => string.Join(", ", BookingDetails
         .Where(d => !d.IsCancelled && d.Seat != null)
-        .Select(d => d.Seat.SeatRow + d.Seat.SeatNumber)
-        .OrderBy(code => code));
+        .OrderBy(d => d.Seat.SeatRow)
+        .ThenBy(d => d.Seat.SeatNumber)
+        .Select(d => d.Seat.SeatRow + d.Seat.SeatNumber));
 
     [NotMapped]
     public decimal TotalAmount => BookingDetails
