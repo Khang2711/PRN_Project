@@ -186,7 +186,7 @@ public class BookingViewModel : BaseViewModel
         }
     }
 
-    private void LoadMyBookings()
+    public void LoadMyBookings()
     {
         MyBookings.Clear();
 
@@ -205,6 +205,7 @@ public class BookingViewModel : BaseViewModel
                     .Include("Customer")
                     .Include("Showtime.Movie")
                     .Include("Showtime.Room")
+                    .Include("BookingDetails.Seat")
                     .AsNoTracking()
                 join u in db.Users.AsNoTracking()
                     on b.CustomerId equals u.UserId
