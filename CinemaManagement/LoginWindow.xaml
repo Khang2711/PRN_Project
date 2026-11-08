@@ -72,7 +72,7 @@
 
                                 <TextBlock Text="Username" Foreground="#334155"
                                            FontWeight="SemiBold" Margin="0,0,0,7"/>
-                                <TextBox x:Name="UsernameTextBox" Height="42"
+                                <TextBox x:Name="UsernameTextBox" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Height="42"
                                          Padding="12,8" FontSize="14"
                                          VerticalContentAlignment="Center"
                                          BorderBrush="#CBD5E1"
@@ -86,7 +86,7 @@
                                              BorderBrush="#CBD5E1"
                                              Margin="0,0,0,8"/>
 
-                                <TextBlock x:Name="ErrorText" Foreground="#DC2626"
+                                <TextBlock x:Name="ErrorText" Text="{Binding SignInError}" Foreground="#DC2626"
                                            FontSize="12" TextWrapping="Wrap"
                                            MinHeight="22" Margin="0,0,0,8"/>
 
@@ -114,22 +114,22 @@
 
                                 <TextBlock Text="Full Name" Foreground="#334155"
                                            FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                <TextBox x:Name="FullNameTextBox" Height="36"
+                                <TextBox x:Name="FullNameTextBox" Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" Height="36"
                                          Padding="10,6" Margin="0,0,0,10"/>
 
                                 <TextBlock Text="Username" Foreground="#334155"
                                            FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                <TextBox x:Name="RegisterUsernameTextBox" Height="36"
+                                <TextBox x:Name="RegisterUsernameTextBox" Text="{Binding RegisterUsername, UpdateSourceTrigger=PropertyChanged}" Height="36"
                                          Padding="10,6" Margin="0,0,0,10"/>
 
                                 <TextBlock Text="Email (optional)" Foreground="#334155"
                                            FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                <TextBox x:Name="EmailTextBox" Height="36"
+                                <TextBox x:Name="EmailTextBox" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Height="36"
                                          Padding="10,6" Margin="0,0,0,10"/>
 
                                 <TextBlock Text="Phone (optional)" Foreground="#334155"
                                            FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                <TextBox x:Name="PhoneTextBox" Height="36"
+                                <TextBox x:Name="PhoneTextBox" Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" Height="36"
                                          Padding="10,6" Margin="0,0,0,10"/>
 
                                 <TextBlock Text="Password" Foreground="#334155"
@@ -142,7 +142,7 @@
                                 <PasswordBox x:Name="ConfirmPasswordBox" Height="36"
                                              Padding="10,6" Margin="0,0,0,8"/>
 
-                                <TextBlock x:Name="RegisterErrorText"
+                                <TextBlock x:Name="RegisterErrorText" Text="{Binding RegisterError}"
                                            Foreground="#DC2626" FontSize="12"
                                            TextWrapping="Wrap" MinHeight="22"
                                            Margin="0,0,0,6"/>

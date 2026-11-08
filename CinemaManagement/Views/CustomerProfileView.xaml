@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="#F3F5F9">
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <Style x:Key="FieldLabel" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#64748B"/>
             <Setter Property="FontSize" Value="12"/>
@@ -79,10 +80,10 @@
                         </Border>
                         <TextBlock Text="ACCOUNT OVERVIEW" Foreground="#AAB6C8"
                                    FontSize="10" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <TextBlock x:Name="ProfileNameText" Text="Customer"
+                        <TextBlock x:Name="ProfileNameText" Text="{Binding DisplayName}"
                                    Foreground="White" FontSize="21"
                                    FontWeight="Bold" TextWrapping="Wrap"/>
-                        <TextBlock x:Name="ProfileUsernameText" Text=""
+                        <TextBlock x:Name="ProfileUsernameText" Text="{Binding DisplayUsername}"
                                    Foreground="#CBD5E1" FontSize="13"
                                    Margin="0,5,0,22" TextWrapping="Wrap"/>
                         <Border Height="1" Background="#3B4759" Margin="0,0,0,18"/>
@@ -90,7 +91,7 @@
                                    FontSize="10" FontWeight="Bold" Margin="0,0,0,7"/>
                         <Border Background="#344256" CornerRadius="8"
                                 Padding="10,8" HorizontalAlignment="Left">
-                            <TextBlock x:Name="ProfileRoleText" Text="Customer"
+                            <TextBlock x:Name="ProfileRoleText" Text="{Binding DisplayRole}"
                                        Foreground="White" FontSize="12"
                                        FontWeight="SemiBold"/>
                         </Border>
@@ -116,24 +117,24 @@
                         </Grid>
 
                         <TextBlock Text="USERNAME" Style="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="UsernameTextBox" Style="{StaticResource ProfileTextBox}"
+                        <TextBox x:Name="UsernameTextBox" Text="{Binding Username, Mode=OneWay}" Style="{StaticResource ProfileTextBox}"
                                  IsReadOnly="True" Background="#F1F5F9"
                                  Margin="0,0,0,18"/>
 
                         <TextBlock Text="FULL NAME" Style="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="FullNameTextBox" Style="{StaticResource ProfileTextBox}"
-                                 Margin="0,0,0,18"/>
+                        <TextBox x:Name="FullNameTextBox" Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ProfileTextBox}"
+                                 IsReadOnly="{Binding IsNotEditing}" Margin="0,0,0,18"/>
 
                         <TextBlock Text="EMAIL ADDRESS" Style="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="EmailTextBox" Style="{StaticResource ProfileTextBox}"
-                                 Margin="0,0,0,18"/>
+                        <TextBox x:Name="EmailTextBox" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ProfileTextBox}"
+                                 IsReadOnly="{Binding IsNotEditing}" Margin="0,0,0,18"/>
 
                         <TextBlock Text="PHONE NUMBER" Style="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="PhoneTextBox" Style="{StaticResource ProfileTextBox}"
-                                 Margin="0,0,0,18"/>
+                        <TextBox x:Name="PhoneTextBox" Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ProfileTextBox}"
+                                 IsReadOnly="{Binding IsNotEditing}" Margin="0,0,0,18"/>
 
                         <TextBlock Text="ROLE" Style="{StaticResource FieldLabel}"/>
-                        <TextBox x:Name="RoleTextBox" Style="{StaticResource ProfileTextBox}"
+                        <TextBox x:Name="RoleTextBox" Text="{Binding Role, Mode=OneWay}" Style="{StaticResource ProfileTextBox}"
                                  IsReadOnly="True" Background="#F1F5F9"
                                  Margin="0,0,0,20"/>
 
@@ -144,22 +145,33 @@
                                        TextWrapping="Wrap"/>
                         </Border>
 
-                        <TextBlock x:Name="StatusText" TextWrapping="Wrap"
-                                   Foreground="#DC2626" FontSize="12"
-                                   Margin="0,0,0,14"/>
+                        <TextBlock x:Name="StatusText" Text="{Binding StatusMessage}" TextWrapping="Wrap"
+                                   FontSize="12" Margin="0,0,0,14">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#DC2626"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsStatusSuccess}" Value="True">
+                                            <Setter Property="Foreground" Value="ForestGreen"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button x:Name="EditButton" Content="Edit profile"
-                                    Click="EditButton_Click"
+                                    Command="{Binding EditCommand}"
+                                    Visibility="{Binding IsNotEditing, Converter={StaticResource BooleanToVisibilityConverter}}"
                                     Style="{StaticResource PrimaryButton}"/>
                             <Button x:Name="SaveButton" Content="Save changes"
-                                    Click="SaveButton_Click"
+                                    Command="{Binding SaveCommand}"
                                     Style="{StaticResource PrimaryButton}"
-                                    Visibility="Collapsed" Margin="0,0,10,0"/>
+                                    Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,10,0"/>
                             <Button x:Name="CancelButton" Content="Cancel"
-                                    Click="CancelButton_Click"
+                                    Command="{Binding CancelCommand}"
                                     Style="{StaticResource SecondaryButton}"
-                                    Visibility="Collapsed"/>
+                                    Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>
