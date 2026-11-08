@@ -94,6 +94,12 @@
                         <TextBlock Text="{Binding Rooms.Count}"
                                    FontWeight="Bold"
                                    Foreground="#334155"/>
+
+                        <CheckBox Content="Show deleted rooms"
+                                  IsChecked="{Binding ShowDeletedRooms, Mode=TwoWay}"
+                                  Margin="18,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Foreground="#475569"/>
                     </StackPanel>
 
                     <Border Grid.Row="2"
@@ -115,7 +121,8 @@
                                                Style="{StaticResource FormLabel}"/>
 
                                     <TextBox x:Name="RoomNameInput"
-                                             MaxLength="50"/>
+         MaxLength="50"
+         Text="{Binding RoomNameInput, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="2">
@@ -123,7 +130,8 @@
                                                Style="{StaticResource FormLabel}"/>
 
                                     <ComboBox x:Name="RoomTypeInput"
-                                              IsEditable="True">
+          IsEditable="True"
+          Text="{Binding RoomTypeInput, UpdateSourceTrigger=PropertyChanged}">
                                         <ComboBoxItem Content="Standard"/>
                                         <ComboBoxItem Content="IMAX"/>
                                         <ComboBoxItem Content="Couple"/>
@@ -133,22 +141,30 @@
 
                             <WrapPanel Margin="0,10,0,0">
                                 <CheckBox x:Name="RoomActiveInput"
-                                          Content="Active"
-                                          VerticalAlignment="Center"
-                                          Margin="0,0,16,0"
-                                          Foreground="#334155"/>
-
+          Content="Active"
+          IsChecked="{Binding RoomActiveInput}"
+          VerticalAlignment="Center"
+          Margin="0,0,16,0"
+          Foreground="#334155"/>
                                 <Button Content="Add"
-                                        Background="#2563EB"
-                                        Style="{StaticResource FormButton}"/>
+        Background="#2563EB"
+        Command="{Binding AddRoomCommand}"
+        Style="{StaticResource FormButton}"/>
 
                                 <Button Content="Edit"
-                                        Background="#475569"
-                                        Style="{StaticResource FormButton}"/>
+        Background="#475569"
+        Command="{Binding EditRoomCommand}"
+        Style="{StaticResource FormButton}"/>
 
                                 <Button Content="Delete"
-                                        Background="#DC2626"
-                                        Style="{StaticResource FormButton}"/>
+        Background="#DC2626"
+        Command="{Binding DeleteRoomCommand}"
+        Style="{StaticResource FormButton}"/>
+
+                                <Button Content="Restore"
+        Background="#0F766E"
+        Command="{Binding RestoreRoomCommand}"
+        Style="{StaticResource FormButton}"/>
                             </WrapPanel>
                         </StackPanel>
                     </Border>
@@ -183,9 +199,17 @@
                                                 Binding="{Binding RoomName}"
                                                 Width="*"/>
 
+                            <DataGridTextColumn Header="Room Type"
+                                                Binding="{Binding RoomType}"
+                                                Width="100"/>
+
                             <DataGridTextColumn Header="Total Seats"
                                                 Binding="{Binding Seats.Count}"
-                                                Width="100"/>
+                                                Width="90"/>
+
+                            <DataGridCheckBoxColumn Header="Active"
+                                                    Binding="{Binding IsActive, Mode=OneWay}"
+                                                    Width="65"/>
 
                         </DataGrid.Columns>
                     </DataGrid>
@@ -248,21 +272,25 @@
                                                Style="{StaticResource FormLabel}"/>
 
                                     <TextBox x:Name="SeatRowInput"
-                                             MaxLength="5"/>
+         MaxLength="5"
+         Text="{Binding SeatRowInput, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Text="Seat Number"
                                                Style="{StaticResource FormLabel}"/>
 
-                                    <TextBox x:Name="SeatNumberInput"/>
+                                    <TextBox x:Name="SeatNumberInput"
+         Text="{Binding SeatNumberInput, UpdateSourceTrigger=PropertyChanged}"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="4">
                                     <TextBlock Text="Seat Type"
                                                Style="{StaticResource FormLabel}"/>
 
-                                    <ComboBox x:Name="SeatTypeInput">
+                                    <ComboBox x:Name="SeatTypeInput"
+          SelectedValuePath="Content"
+          SelectedValue="{Binding SeatTypeInput, UpdateSourceTrigger=PropertyChanged}">
                                         <ComboBoxItem Content="Standard"/>
                                         <ComboBoxItem Content="VIP"/>
                                         <ComboBoxItem Content="Couple"/>
@@ -272,29 +300,34 @@
 
                             <WrapPanel Margin="0,10,0,0">
                                 <CheckBox x:Name="SeatActiveInput"
-                                          Content="Active"
-                                          VerticalAlignment="Center"
-                                          Margin="0,0,16,0"
-                                          Foreground="#334155"/>
+          Content="Active"
+          IsChecked="{Binding SeatActiveInput}"
+          VerticalAlignment="Center"
+          Margin="0,0,16,0"
+          Foreground="#334155"/>
 
                                 <Button Content="Add"
-                                        Background="#2563EB"
-                                        Style="{StaticResource FormButton}"/>
+        Background="#2563EB"
+        Command="{Binding AddSeatCommand}"
+        Style="{StaticResource FormButton}"/>
 
                                 <Button Content="Edit"
-                                        Background="#475569"
-                                        Style="{StaticResource FormButton}"/>
+        Background="#475569"
+        Command="{Binding EditSeatCommand}"
+        Style="{StaticResource FormButton}"/>
 
                                 <Button Content="Delete"
-                                        Background="#DC2626"
-                                        Style="{StaticResource FormButton}"/>
+        Background="#DC2626"
+        Command="{Binding DeleteSeatCommand}"
+        Style="{StaticResource FormButton}"/>
                             </WrapPanel>
                         </StackPanel>
                     </Border>
 
                     <DataGrid Grid.Row="3"
-                              MinHeight="140"
-                              ItemsSource="{Binding Seats}"
+          MinHeight="140"
+          ItemsSource="{Binding Seats}"
+          SelectedItem="{Binding SelectedSeat, Mode=TwoWay}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               CanUserAddRows="False"
@@ -329,9 +362,13 @@
 
                             </DataGridTextColumn>
 
+                            <DataGridTextColumn Header="Seat Type"
+                                                Binding="{Binding SeatType}"
+                                                Width="100"/>
+
                             <DataGridCheckBoxColumn Header="Active"
                                                     Binding="{Binding IsActive, Mode=OneWay}"
-                                                    Width="90"/>
+                                                    Width="75"/>
 
                         </DataGrid.Columns>
                     </DataGrid>

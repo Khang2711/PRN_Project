@@ -321,7 +321,7 @@ public class BookingViewModel : BaseViewModel
     private static bool IsCancellable(Booking b) => IsPayable(b) && b.Status != "Completed";
 
     // F29: Tải danh sách booking của khách hàng; selectedBookingId = booking cần chọn lại sau khi tải
-    private void LoadMyBookings(int selectedBookingId = 0)
+    public void LoadMyBookings(int selectedBookingId = 0)
     {
         MyBookings.Clear();
         SelectedBooking = null;

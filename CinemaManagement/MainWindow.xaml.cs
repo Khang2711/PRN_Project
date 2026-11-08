@@ -12,28 +12,28 @@ public partial class MainWindow : Window
 {
     private readonly string _username;
     private readonly string _role;
-
     private readonly BookingViewModel _bookingViewModel;
 
     public MainWindow(string username, string role)
     {
         InitializeComponent();
-
         _username = username;
         _role = role;
-
         CurrentUserText.Text = $"{_username} ({_role})";
+        BrowseMoviesControl.Username = _username;
+
+        if (string.Equals(_role, "Admin", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(_role, "Staff", StringComparison.OrdinalIgnoreCase))
+            PaymentsControl.DataContext = new PaymentsViewModel(_username);
+        if (string.Equals(_role, "Admin", StringComparison.OrdinalIgnoreCase))
+            AccountControl.DataContext = new AccountViewModel(_username);
 
         _bookingViewModel = new BookingViewModel(_username, _role);
-
         BookingControl.DataContext = _bookingViewModel;
         ViewBookingControl.DataContext = _bookingViewModel;
 
-        ShowtimesControl.AddHandler(
-            Selector.SelectionChangedEvent,
-            new SelectionChangedEventHandler(Showtime_SelectionChanged),
-            true
-        );
+        ShowtimesControl.AddHandler(Selector.SelectionChangedEvent,
+            new SelectionChangedEventHandler(Showtime_SelectionChanged), true);
 
         if (!_bookingViewModel.IsCustomer)
         {
@@ -41,24 +41,23 @@ public partial class MainWindow : Window
             ViewBookingTab.Visibility = Visibility.Collapsed;
             CustomerProfileTab.Visibility = Visibility.Collapsed;
         }
-        else
-        {
-            CustomerProfileControl.LoadProfile(_username);
-        }
+        else CustomerProfileControl.LoadProfile(_username);
 
-        bool isAdmin = string.Equals(
-            _role,
-            "Admin",
-            StringComparison.OrdinalIgnoreCase
-        );
-
-        if (ShowtimesTab.Content is ShowtimesView showtimesView
-            && showtimesView.DataContext is ShowtimesViewModel showtimesVM)
-        {
+        bool isAdmin = string.Equals(_role, "Admin", StringComparison.OrdinalIgnoreCase);
+        if (ShowtimesTab.Content is ShowtimesView showtimesView &&
+            showtimesView.DataContext is ShowtimesViewModel showtimesVM)
             showtimesVM.CanManageShowtimes = isAdmin;
-        }
 
-        if (isAdmin)
+        bool isStaff = string.Equals(_role, "Staff", StringComparison.OrdinalIgnoreCase);
+        if (isStaff)
+        {
+            ManageMoviesTab.Visibility = Visibility.Collapsed;
+            RoomsSeatsTab.Visibility = Visibility.Collapsed;
+            AccountTab.Visibility = Visibility.Collapsed;
+            BrowseMoviesTab.Visibility = Visibility.Collapsed;
+            MainTabControl.SelectedItem = PaymentsTab;
+        }
+        else if (isAdmin)
         {
             BrowseMoviesTab.Visibility = Visibility.Collapsed;
             MainTabControl.SelectedItem = ShowtimesTab;
@@ -70,22 +69,19 @@ public partial class MainWindow : Window
             PaymentsTab.Visibility = Visibility.Collapsed;
             AccountTab.Visibility = Visibility.Collapsed;
             ShowtimesTab.Visibility = Visibility.Collapsed;
-
             MainTabControl.SelectedItem = BrowseMoviesTab;
         }
     }
 
-    private void Showtime_SelectionChanged(
-        object sender,
-        SelectionChangedEventArgs e)
+    public void RefreshCustomerBookings()
     {
-        if (!_bookingViewModel.IsCustomer)
-        {
-            return;
-        }
+        _bookingViewModel.LoadMyBookings();
+    }
 
-        if (e.OriginalSource is DataGrid grid
-            && grid.SelectedItem is Showtime showtime)
+    private void Showtime_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_bookingViewModel.IsCustomer) return;
+        if (e.OriginalSource is DataGrid grid && grid.SelectedItem is Showtime showtime)
         {
             _bookingViewModel.SelectedShowtime = showtime;
             MainTabControl.SelectedItem = BookingTab;
@@ -93,22 +89,11 @@ public partial class MainWindow : Window
         }
     }
 
-    private void SignOutButton_Click(
-        object sender,
-        RoutedEventArgs e)
+    private void SignOutButton_Click(object sender, RoutedEventArgs e)
     {
-        MessageBoxResult result = MessageBox.Show(
-            "Are you sure you want to sign out?",
-            "Sign Out",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question
-        );
-
-        if (result != MessageBoxResult.Yes)
-        {
-            return;
-        }
-
+        MessageBoxResult result = MessageBox.Show("Are you sure you want to sign out?",
+            "Sign Out", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (result != MessageBoxResult.Yes) return;
         var loginWindow = new LoginWindow();
         Application.Current.MainWindow = loginWindow;
         loginWindow.Show();

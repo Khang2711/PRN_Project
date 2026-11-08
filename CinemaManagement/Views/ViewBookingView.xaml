@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="CinemaManagement.Views.ViewBookingView"
+<UserControl x:Class="CinemaManagement.Views.ViewBookingView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="#F5F6FA">
@@ -197,5 +197,4 @@
                         Visibility="Collapsed"/>
 
     </Grid>
-
 </UserControl>
