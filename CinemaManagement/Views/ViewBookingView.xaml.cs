@@ -1,37 +1,43 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using CinemaManagement.ViewModels;
 
-namespace CinemaManagement.Views
+namespace CinemaManagement.Views;
+
+public partial class ViewBookingView : UserControl
 {
-    /// <summary>
-    /// Interaction logic for ViewBookingView.xaml
-    /// </summary>
-    public partial class ViewBookingView : UserControl
+    public ViewBookingView()
     {
-        public ViewBookingView()
+        InitializeComponent();
+    }
+
+    // F30: Chọn một booking để mở trang chi tiết
+    private void BookingGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (BookingGrid.SelectedItem is not BookingListItem ||
+            DataContext is not BookingViewModel vm)
         {
-            InitializeComponent();
+            return;
         }
 
-        private void RefreshButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is BookingViewModel viewModel)
-            {
-                viewModel.LoadMyBookings();
-            }
-        }
+        // Tạo trang chi tiết và dùng chung ViewModel
+        BookingDetailsView detailsView = new BookingDetailsView();
+        detailsView.DataContext = vm;
+        detailsView.BackRequested += DetailsView_BackRequested;
+
+        DetailsHost.Content = detailsView;
+        DetailsHost.Visibility = Visibility.Visible;
+        ListPage.Visibility = Visibility.Collapsed;
+    }
+
+    // Quay lại danh sách booking
+    private void DetailsView_BackRequested(object? sender, EventArgs e)
+    {
+        DetailsHost.Content = null;
+        DetailsHost.Visibility = Visibility.Collapsed;
+        ListPage.Visibility = Visibility.Visible;
+
+        // Bỏ chọn dòng để lần sau chọn lại vẫn mở được
+        BookingGrid.SelectedItem = null;
     }
 }

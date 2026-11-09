@@ -27,10 +27,12 @@ namespace CinemaManagement.Views
             {
                 Owner = this
             };
-            popup.ShowDialog();
-
-            if (Owner is MainWindow mainWindow)
-                mainWindow.RefreshCustomerBookings();
+            if (popup.ShowDialog() == true && Owner is MainWindow mainWindow)
+            {
+                var selectedSeatIds = popup.SelectedSeatIds;
+                Close();
+                mainWindow.OpenBooking(showtime, selectedSeatIds);
+            }
         }
 
         private void Close_Click(object sender, RoutedEventArgs e) => Close();
