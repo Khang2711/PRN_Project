@@ -2,196 +2,330 @@ using CinemaManagement.Helpers;
 using CinemaManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
-using System.Windows;
+using System.ComponentModel;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace CinemaManagement.ViewModels;
 
+// Một ghế trên giao diện Booking
+public class BookingSeatOption : BaseViewModel
+{
+    public int SeatId { get; set; }
+    public string SeatCode { get; set; } = "";
+    public string SeatType { get; set; } = "";
+    public bool IsBooked { get; set; }
+
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            _isSelected = value;
+            OnPropertyChanged(nameof(IsSelected));
+        }
+    }
+}
+
+// Một ghế trong Booking Details (F30)
+public class BookingSeatDetailItem
+{
+    public string SeatCode { get; set; } = "";
+    public string SeatType { get; set; } = "";
+    public decimal PriceAtBooking { get; set; }
+    public bool IsCancelled { get; set; }
+    public string Status => IsCancelled ? "Released" : "Reserved";
+}
+
+// Một dòng trong danh sách Booking (F29)
+public class BookingListItem
+{
+    public int BookingId { get; set; }
+    public string BookingCode { get; set; } = "";
+    public string MovieTitle { get; set; } = "";
+    public string RoomName { get; set; } = "";
+    public DateTime ShowtimeStart { get; set; }
+    public DateTime BookingTime { get; set; }
+    public string SeatCodes { get; set; } = "";
+    public decimal TotalAmount { get; set; }
+    public string Status { get; set; } = "";
+    public string PaymentStatus { get; set; } = "";
+    public bool CanCancel { get; set; }
+    public List<BookingSeatDetailItem> SeatDetails { get; set; } = new();
+
+    public string ShowtimeText => ShowtimeStart.ToString("dd/MM/yyyy HH:mm");
+    public string BookingTimeText => BookingTime.ToString("dd/MM/yyyy HH:mm");
+}
+
 public class BookingViewModel : BaseViewModel
 {
-    // Danh sách lưu trong bộ nhớ khi ứng dụng đang chạy.
-    private static readonly ObservableCollection<Booking> AllBookings = new();
-
     private readonly string _role;
-
     private Showtime? _selectedShowtime;
-
-    private bool _confirmed;
-
-    private string _message = "Go to Showtimes and select a movie.";
+    private BookingListItem? _selectedBooking;
+    private string _message = "Select a showtime to start booking.";
+    private string _bookingsMessage = "";
+    private string _bookingCodeSearchText = "";
 
     public string Username { get; }
 
-    public ObservableCollection<Booking> MyBookings { get; } = new();
+    public ObservableCollection<BookingSeatOption> Seats { get; } = new();
+    public ObservableCollection<BookingListItem> MyBookings { get; } = new();
 
+    // F32: ICollectionView để lọc danh sách booking theo mã
+    public ICollectionView BookingView { get; }
+
+    public ICommand ToggleSeatCommand { get; }
     public ICommand ConfirmBookingCommand { get; }
+    public ICommand RefreshMyBookingsCommand { get; }
+    public ICommand LookUpBookingCommand { get; }
+    public ICommand CancelBookingCommand { get; }
 
-    public bool IsCustomer =>
-        !string.IsNullOrWhiteSpace(Username)
-        && (_role == "User" || _role == "Customer");
+    // Chỉ tài khoản Customer mới được đặt vé
+    public bool IsCustomer => _role == "Customer";
 
     public Showtime? SelectedShowtime
     {
         get => _selectedShowtime;
-
         set
         {
             _selectedShowtime = value;
+            OnPropertyChanged(nameof(SelectedShowtime));
+            LoadSeats();
+        }
+    }
 
-            // Chọn suất chiếu mới thì được xác nhận đơn mới.
-            _confirmed = false;
-
-            Message = "Check the information, then click Confirm Booking.";
-
-            OnPropertyChanged();
-
+    public BookingListItem? SelectedBooking
+    {
+        get => _selectedBooking;
+        set
+        {
+            _selectedBooking = value;
+            OnPropertyChanged(nameof(SelectedBooking));
             CommandManager.InvalidateRequerySuggested();
+        }
+    }
+
+    public int SelectedSeatCount => Seats.Count(s => s.IsSelected);
+
+    public decimal TotalPrice => (SelectedShowtime?.TicketPrice ?? 0) * SelectedSeatCount;
+
+    public string BookingCodeSearchText
+    {
+        get => _bookingCodeSearchText;
+        set
+        {
+            _bookingCodeSearchText = value;
+            OnPropertyChanged(nameof(BookingCodeSearchText));
         }
     }
 
     public string Message
     {
         get => _message;
-
         private set
         {
             _message = value;
-            OnPropertyChanged();
+            OnPropertyChanged(nameof(Message));
+        }
+    }
+
+    public string BookingsMessage
+    {
+        get => _bookingsMessage;
+        private set
+        {
+            _bookingsMessage = value;
+            OnPropertyChanged(nameof(BookingsMessage));
         }
     }
 
     public BookingViewModel(string username, string role)
     {
         Username = username;
-
         _role = role;
+
+        BookingView = CollectionViewSource.GetDefaultView(MyBookings);
+        BookingView.Filter = FilterBooking;
+
+        ToggleSeatCommand = new RelayCommand(ToggleSeat);
 
         ConfirmBookingCommand = new RelayCommand(
             _ => ConfirmBooking(),
-            _ => IsCustomer
-                 && SelectedShowtime != null
-                 && !_confirmed
-        );
+            _ => IsCustomer && SelectedShowtime != null && SelectedSeatCount > 0);
+
+        RefreshMyBookingsCommand = new RelayCommand(_ => LoadMyBookings(), _ => IsCustomer);
+
+        LookUpBookingCommand = new RelayCommand(_ => BookingView.Refresh());
+
+        CancelBookingCommand = new RelayCommand(
+            _ => CancelSelectedBooking(),
+            _ => IsCustomer && SelectedBooking != null && SelectedBooking.CanCancel);
 
         LoadMyBookings();
     }
 
-    private void ConfirmBooking()
+    // Báo cho giao diện cập nhật số ghế và tổng tiền
+    private void UpdateSeatInfo()
     {
-        if (!IsCustomer || SelectedShowtime == null || _confirmed)
+        OnPropertyChanged(nameof(SelectedSeatCount));
+        OnPropertyChanged(nameof(TotalPrice));
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    // F28: Chọn hoặc bỏ chọn ghế (ghế đã đặt thì bỏ qua)
+    private void ToggleSeat(object? parameter)
+    {
+        if (parameter is BookingSeatOption { IsBooked: false } seat)
         {
-            return;
+            seat.IsSelected = !seat.IsSelected;
+            UpdateSeatInfo();
         }
+    }
 
-        Showtime showtime = SelectedShowtime;
+    // F28: Tải ghế và trạng thái ghế của suất chiếu đang chọn
+    private void LoadSeats()
+    {
+        Seats.Clear();
 
-        if (showtime.StartTime <= DateTime.Now)
+        if (SelectedShowtime == null)
         {
-            Message =
-                "This showtime has already started. Select another showtime.";
-
-            return;
-        }
-
-        if (!showtime.IsActive)
-        {
-            Message = "This showtime is not available for booking.";
-            return;
-        }
-
-        if (showtime.TicketPrice <= 0)
-        {
-            Message = "The ticket price is invalid.";
+            Message = "Select a showtime to start booking.";
+            UpdateSeatInfo();
             return;
         }
 
         try
         {
             using var db = new CinemaManagementDbContext();
+            int showtimeId = SelectedShowtime.ShowtimeId;
+            int roomId = SelectedShowtime.RoomId;
 
-            // Tim khach hang trong database
-            var customer = (
-                from u in db.Users
-                where u.Username == Username && u.IsActive
-                select u
-            ).FirstOrDefault();
+            var bookedSeatIds = db.BookingDetails
+                .Where(d => d.ShowtimeId == showtimeId && !d.IsCancelled)
+                .Select(d => d.SeatId)
+                .ToList();
 
-            if (customer == null)
+            var roomSeats = db.Seats
+                .AsNoTracking()
+                .Where(s => s.RoomId == roomId && s.IsActive)
+                .OrderBy(s => s.SeatRow).ThenBy(s => s.SeatNumber)
+                .ToList();
+
+            foreach (Seat seat in roomSeats)
             {
-                Message = "Customer account does not exist in database.";
-                return;
+                Seats.Add(new BookingSeatOption
+                {
+                    SeatId = seat.SeatId,
+                    SeatCode = seat.SeatRow + seat.SeatNumber,
+                    SeatType = seat.SeatType,
+                    IsBooked = bookedSeatIds.Contains(seat.SeatId)
+                });
             }
 
-            // Kiem tra suat chieu trong database
-            var selectedShowtime = (
-                from s in db.Showtimes
-                where s.ShowtimeId == showtime.ShowtimeId
-                      && s.IsActive
-                select s
-            ).FirstOrDefault();
+            Message = roomSeats.Count == 0
+                ? "There are no active seats in this room."
+                : "Select available seats, then confirm your booking.";
+        }
+        catch (Exception ex)
+        {
+            Message = "Cannot load seats: " + ex.GetBaseException().Message;
+        }
 
-            if (selectedShowtime == null ||
-                selectedShowtime.StartTime <= DateTime.Now)
+        UpdateSeatInfo();
+    }
+
+    // F28: Tạo Booking và BookingDetails
+    private void ConfirmBooking()
+    {
+        var selectedSeatIds = Seats
+            .Where(s => s.IsSelected && !s.IsBooked)
+            .Select(s => s.SeatId)
+            .ToList();
+
+        if (!IsCustomer || SelectedShowtime == null || selectedSeatIds.Count == 0)
+        {
+            Message = "Please select a showtime and at least one seat.";
+            return;
+        }
+
+        int showtimeId = SelectedShowtime.ShowtimeId;
+
+        try
+        {
+            using var db = new CinemaManagementDbContext();
+
+            var customer = db.Users.FirstOrDefault(u => u.Username == Username);
+            var showtime = db.Showtimes.FirstOrDefault(
+                s => s.ShowtimeId == showtimeId && s.IsActive && s.StartTime > DateTime.Now);
+
+            if (customer == null || showtime == null)
             {
                 Message = "This showtime is no longer available.";
                 return;
             }
 
-            // Tao booking moi
-            Booking booking = new Booking
+            // Booking và các BookingDetail được lưu trong 1 lần SaveChanges (tự là 1 transaction).
+            // Ghế bị đặt trùng sẽ vướng unique index UX_BookingDetails_ActiveSeatPerShowtime.
+            var booking = new Booking
             {
-                BookingCode = "BK" +
-                    Guid.NewGuid().ToString("N")
-                        .Substring(0, 12).ToUpperInvariant(),
-
+                BookingCode = "BK" + Guid.NewGuid().ToString("N")[..12].ToUpper(),
                 CustomerId = customer.UserId,
-
-                ShowtimeId = selectedShowtime.ShowtimeId,
-
+                ShowtimeId = showtime.ShowtimeId,
                 BookingTime = DateTime.Now,
-
                 Status = "Pending",
-
                 PaymentStatus = "Unpaid",
-
                 IsCancelled = false
             };
 
-            // Luu booking vao database
+            foreach (int seatId in selectedSeatIds)
+            {
+                booking.BookingDetails.Add(new BookingDetail
+                {
+                    ShowtimeId = showtime.ShowtimeId,
+                    SeatId = seatId,
+                    PriceAtBooking = showtime.TicketPrice,
+                    IsCancelled = false,
+                    CheckedIn = false
+                });
+            }
+
             db.Bookings.Add(booking);
             db.SaveChanges();
 
-            // Load lai danh sach booking
-            LoadMyBookings();
-
-            // Ngăn bấm xác nhận liên tục tạo nhiều đơn.
-            _confirmed = true;
-
-            Message = "Saved " + booking.BookingCode
-                + ". Open View Booking to see your booking.";
-
-            CommandManager.InvalidateRequerySuggested();
+            LoadSeats();
+            LoadMyBookings(booking.BookingId);
+            Message = "Booking created successfully. Code: " + booking.BookingCode;
+        }
+        catch (DbUpdateException)
+        {
+            LoadSeats();
+            Message = "A selected seat may have been booked by another customer. Please select again.";
         }
         catch (Exception ex)
         {
-            Message = "Cannot save booking: "
-                + ex.GetBaseException().Message;
-
-            MessageBox.Show(
-                Message,
-                "Database Error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error
-            );
+            LoadSeats();
+            Message = "Cannot create booking: " + ex.GetBaseException().Message;
         }
     }
 
-    public void LoadMyBookings()
+    // F31: Hủy booking chưa thanh toán, chưa bị hủy, chưa chiếu và chưa Completed
+    private static bool IsCancellable(Booking b) =>
+        !b.IsCancelled
+        && b.Status != "Cancelled"
+        && b.PaymentStatus == "Unpaid"
+        && b.Showtime.StartTime > DateTime.Now
+        && b.Status != "Completed";
+
+    // F29: Tải danh sách booking của khách hàng; selectedBookingId = booking cần chọn lại sau khi tải
+    private void LoadMyBookings(int selectedBookingId = 0)
     {
         MyBookings.Clear();
+        SelectedBooking = null;
 
         if (!IsCustomer)
         {
+            BookingsMessage = "Only customer accounts can view bookings.";
             return;
         }
 
@@ -199,35 +333,106 @@ public class BookingViewModel : BaseViewModel
         {
             using var db = new CinemaManagementDbContext();
 
-            // Lay booking cua khach hang tu database
-            var data = (
-                from b in db.Bookings
-                    .Include("Customer")
-                    .Include("Showtime.Movie")
-                    .Include("Showtime.Room")
-                    .Include("BookingDetails.Seat")
-                    .AsNoTracking()
-                join u in db.Users.AsNoTracking()
-                    on b.CustomerId equals u.UserId
-                where u.Username == Username
-                orderby b.BookingTime descending
-                select b
-            ).ToList();
+            var bookings = db.Bookings
+                .Include("Showtime.Movie")
+                .Include("Showtime.Room")
+                .Include("BookingDetails.Seat")
+                .AsNoTracking()
+                .Where(b => b.Customer.Username == Username)
+                .OrderByDescending(b => b.BookingTime)
+                .ToList();
 
-            foreach (Booking booking in data)
+            foreach (Booking b in bookings)
             {
-                MyBookings.Add(booking);
+                var seatDetails = b.BookingDetails.Select(d => new BookingSeatDetailItem
+                {
+                    SeatCode = d.Seat.SeatRow + d.Seat.SeatNumber,
+                    SeatType = d.Seat.SeatType,
+                    PriceAtBooking = d.PriceAtBooking,
+                    IsCancelled = d.IsCancelled
+                }).ToList();
+
+                MyBookings.Add(new BookingListItem
+                {
+                    BookingId = b.BookingId,
+                    BookingCode = b.BookingCode,
+                    MovieTitle = b.Showtime.Movie.Title,
+                    RoomName = b.Showtime.Room.RoomName,
+                    ShowtimeStart = b.Showtime.StartTime,
+                    BookingTime = b.BookingTime,
+                    SeatCodes = seatDetails.Count == 0 ? "-" : string.Join(", ", seatDetails.Select(s => s.SeatCode)),
+                    TotalAmount = seatDetails.Sum(s => s.PriceAtBooking),
+                    Status = b.Status,
+                    PaymentStatus = b.PaymentStatus,
+                    CanCancel = IsCancellable(b),
+                    SeatDetails = seatDetails
+                });
+            }
+
+            SelectedBooking = MyBookings.FirstOrDefault(b => b.BookingId == selectedBookingId);
+            BookingsMessage = "";
+        }
+        catch (Exception ex)
+        {
+            BookingsMessage = "Cannot load bookings: " + ex.GetBaseException().Message;
+        }
+
+        CommandManager.InvalidateRequerySuggested();
+    }
+
+    // F32: dòng nào trả về true thì được hiển thị
+    private bool FilterBooking(object item) =>
+        item is BookingListItem b
+        && b.BookingCode.Contains(BookingCodeSearchText.Trim(), StringComparison.OrdinalIgnoreCase);
+
+    // F31: Hủy booking chưa thanh toán và trả ghế
+    private void CancelSelectedBooking()
+    {
+        if (SelectedBooking == null || !SelectedBooking.CanCancel)
+        {
+            return;
+        }
+
+        int bookingId = SelectedBooking.BookingId;
+
+        try
+        {
+            using var db = new CinemaManagementDbContext();
+
+            // Chỉ lấy booking của khách hàng đang đăng nhập
+            var booking = db.Bookings
+                .Include("Showtime")
+                .Include("BookingDetails")
+                .FirstOrDefault(b => b.BookingId == bookingId && b.Customer.Username == Username);
+
+            if (booking == null || !IsCancellable(booking))
+            {
+                BookingsMessage = "This booking is not eligible for cancellation.";
+                return;
+            }
+
+            booking.IsCancelled = true;
+            booking.Status = "Cancelled";
+
+            foreach (BookingDetail detail in booking.BookingDetails)
+            {
+                detail.IsCancelled = true;
+            }
+
+            db.SaveChanges();
+
+            LoadMyBookings(bookingId);
+            BookingsMessage = "Booking cancelled successfully. Seats have been released.";
+
+            // Đang xem đúng suất chiếu này thì cập nhật lại ghế
+            if (SelectedShowtime?.ShowtimeId == booking.ShowtimeId)
+            {
+                LoadSeats();
             }
         }
         catch (Exception ex)
         {
-            MessageBox.Show(
-                "Cannot load bookings from database!\n\n"
-                + ex.GetBaseException().Message,
-                "Database Error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error
-            );
+            BookingsMessage = "Cannot cancel booking: " + ex.GetBaseException().Message;
         }
     }
 }

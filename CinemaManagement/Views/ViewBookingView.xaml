@@ -1,53 +1,201 @@
-<UserControl x:Class="CinemaManagement.Views.ViewBookingView"
+﻿<UserControl x:Class="CinemaManagement.Views.ViewBookingView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="#F5F6FA">
-    <Grid Margin="25">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
 
-        <Grid Margin="0,0,0,15">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel>
-                <TextBlock Text="VIEW BOOKING" FontSize="24" FontWeight="Bold"/>
-                <TextBlock Text="{Binding Username, StringFormat='Customer: {0}'}"
-                           Margin="0,8,0,0"/>
+    <Grid Margin="20">
+
+        <!-- ================================= -->
+        <!-- BOOKING LIST                      -->
+        <!-- ================================= -->
+
+        <Grid x:Name="ListPage"
+              Visibility="Visible">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- HEADER -->
+            <StackPanel Grid.Row="0"
+                        Margin="0,0,0,15">
+
+                <TextBlock Text="BOOKING LIST"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="#1E293B"/>
+
+                <TextBlock
+                    Text="{Binding Username,
+                        StringFormat='Customer: {0}'}"
+                    Foreground="#64748B"
+                    Margin="0,5,0,0"/>
+
             </StackPanel>
-            <Button Grid.Column="1"
-                    Content="↻  Refresh"
-                    Click="RefreshButton_Click"
-                    Width="110"
-                    Height="36"
-                    Margin="15,0,0,0"
-                    Background="#2563EB"
-                    Foreground="White"
-                    FontWeight="SemiBold"
-                    BorderThickness="0"
-                    Cursor="Hand"/>
+
+            <!-- SEARCH -->
+            <Border Grid.Row="1"
+                    Background="White"
+                    BorderBrush="#E2E8F0"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="12"
+                    Margin="0,0,0,12">
+
+                <StackPanel>
+
+                    <TextBlock Text="SEARCH BOOKING"
+                               FontWeight="Bold"
+                               Margin="0,0,0,8"/>
+
+                    <DockPanel LastChildFill="False">
+
+                        <TextBox Width="260"
+                                 Height="36"
+                                 Padding="8,5"
+                                 VerticalContentAlignment="Center"
+                                 Text="{Binding BookingCodeSearchText,
+                                     UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <Button Content="Search"
+                                Command="{Binding LookUpBookingCommand}"
+                                Width="90"
+                                Height="36"
+                                Margin="10,0,0,0"
+                                Background="#2563EB"
+                                Foreground="White"
+                                BorderThickness="0"/>
+
+                        <Button Content="Refresh"
+                                Command="{Binding RefreshMyBookingsCommand}"
+                                Width="90"
+                                Height="36"
+                                Margin="10,0,0,0"/>
+
+                    </DockPanel>
+
+                    <TextBlock Text="{Binding BookingsMessage}"
+                               Foreground="#2563EB"
+                               Margin="0,8,0,0"
+                               TextWrapping="Wrap"/>
+
+                </StackPanel>
+
+            </Border>
+
+            <!-- DATA GRID -->
+            <Border Grid.Row="2"
+                    Background="White"
+                    BorderBrush="#E2E8F0"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="12">
+
+                <StackPanel>
+
+                    <DockPanel Margin="0,0,0,8">
+
+                        <TextBlock Text="BOOKING LIST"
+                                   FontSize="16"
+                                   FontWeight="Bold"/>
+
+                        <TextBlock
+                            Text="{Binding MyBookings.Count,
+                                StringFormat='Total bookings: {0}'}"
+                            Foreground="#64748B"
+                            HorizontalAlignment="Right"/>
+
+                    </DockPanel>
+
+                    <TextBlock
+                        Text="Select a booking row to view its details."
+                        FontSize="12"
+                        Foreground="#64748B"
+                        Margin="0,0,0,8"/>
+
+                    <DataGrid x:Name="BookingGrid"
+                              ItemsSource="{Binding BookingView}"
+                              SelectedItem="{Binding SelectedBooking,
+                                  Mode=TwoWay}"
+                              SelectionChanged="BookingGrid_SelectionChanged"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow"
+                              RowHeight="38"
+                              ColumnHeaderHeight="38"
+                              Height="245"
+                              VerticalAlignment="Top"
+                              GridLinesVisibility="Horizontal"
+                              AlternatingRowBackground="#F1F5F9"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto">
+
+                        <DataGrid.Columns>
+
+                            <DataGridTextColumn
+                                Header="Booking Code"
+                                Binding="{Binding BookingCode}"
+                                Width="150"/>
+
+                            <DataGridTextColumn
+                                Header="Movie"
+                                Binding="{Binding MovieTitle}"
+                                Width="*"/>
+
+                            <DataGridTextColumn
+                                Header="Room"
+                                Binding="{Binding RoomName}"
+                                Width="100"/>
+
+                            <DataGridTextColumn
+                                Header="Showtime"
+                                Binding="{Binding ShowtimeText}"
+                                Width="150"/>
+
+                            <DataGridTextColumn
+                                Header="Seats"
+                                Binding="{Binding SeatCodes}"
+                                Width="120"/>
+
+                            <DataGridTextColumn
+                                Header="Amount"
+                                Binding="{Binding TotalAmount,
+                                    StringFormat={}{0:N0}}"
+                                Width="110"/>
+
+                            <DataGridTextColumn
+                                Header="Status"
+                                Binding="{Binding Status}"
+                                Width="100"/>
+
+                            <DataGridTextColumn
+                                Header="Payment"
+                                Binding="{Binding PaymentStatus}"
+                                Width="100"/>
+
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+
+                </StackPanel>
+
+            </Border>
+
         </Grid>
 
-        <TextBlock Grid.Row="1" Text="{Binding MyBookings.Count, StringFormat='Bookings: {0}'}"
-                   Margin="0,0,0,15"/>
-        <DataGrid Grid.Row="2" ItemsSource="{Binding MyBookings}"
-                  AutoGenerateColumns="False" IsReadOnly="True"
-                  CanUserAddRows="False" CanUserDeleteRows="False"
-                  RowHeight="38" ColumnHeaderHeight="38"
-                  AlternatingRowBackground="#F1F5F9">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Booking Code" Binding="{Binding BookingCode}" Width="150"/>
-                <DataGridTextColumn Header="Movie" Binding="{Binding Showtime.Movie.Title}" Width="*"/>
-                <DataGridTextColumn Header="Showtime" Binding="{Binding Showtime.StartTime, StringFormat='dd/MM/yyyy HH:mm'}" Width="145"/>
-                <DataGridTextColumn Header="Seats" Binding="{Binding SeatSummary}" Width="120"/>
-                <DataGridTextColumn Header="Total (VND)" Binding="{Binding TotalAmount, StringFormat='N0'}" Width="120"/>
-                <DataGridTextColumn Header="Payment" Binding="{Binding PaymentStatus}" Width="90"/>
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="90"/>
-            </DataGrid.Columns>
-        </DataGrid>
+
+        <!-- ================================= -->
+        <!-- DETAIL VIEW CONTAINER             -->
+        <!-- ================================= -->
+
+        <ContentControl x:Name="DetailsHost"
+                        Visibility="Collapsed"/>
+
     </Grid>
+
 </UserControl>
