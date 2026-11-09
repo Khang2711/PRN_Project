@@ -63,166 +63,13 @@
 
                     <Separator Margin="0,5,0,15"/>
 
-                    <!-- SEAT SELECTION -->
-                    <TextBlock Text="SELECT YOUR SEATS"
+                    <!-- Seats are selected in SeatAvailabilityWindow, not in this summary. -->
+                    <TextBlock Text="BOOKING SUMMARY"
                                FontSize="18"
                                FontWeight="Bold"
                                Margin="0,0,0,15"/>
 
-                    <!-- SEAT LEGEND -->
-                    <WrapPanel Margin="0,0,0,15">
-
-                        <StackPanel Orientation="Horizontal"
-                                    Margin="0,0,20,5">
-
-                            <Border Width="18"
-                                    Height="18"
-                                    Background="#16A34A"
-                                    CornerRadius="3"
-                                    Margin="0,0,6,0"/>
-
-                            <TextBlock Text="Available"
-                                       VerticalAlignment="Center"/>
-
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal"
-                                    Margin="0,0,20,5">
-
-                            <Border Width="18"
-                                    Height="18"
-                                    Background="#DC2626"
-                                    CornerRadius="3"
-                                    Margin="0,0,6,0"/>
-
-                            <TextBlock Text="Booked"
-                                       VerticalAlignment="Center"/>
-
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal"
-                                    Margin="0,0,20,5">
-
-                            <Border Width="18"
-                                    Height="18"
-                                    Background="#2563EB"
-                                    CornerRadius="3"
-                                    Margin="0,0,6,0"/>
-
-                            <TextBlock Text="Selected"
-                                       VerticalAlignment="Center"/>
-
-                        </StackPanel>
-
-                    </WrapPanel>
-
-                    <!-- SCREEN -->
-                    <Border Background="#CBD5E1"
-                            CornerRadius="5"
-                            Height="30"
-                            Margin="30,0,30,20">
-
-                        <TextBlock Text="SCREEN"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   FontWeight="Bold"
-                                   Foreground="#334155"/>
-
-                    </Border>
-
-                    <!-- SEAT LIST -->
-                    <Border Background="#F8FAFC"
-                            BorderBrush="#E2E8F0"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            Padding="15">
-
-                        <ItemsControl ItemsSource="{Binding Seats}">
-
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel HorizontalAlignment="Center"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-
-                            <ItemsControl.ItemTemplate>
-
-                                <DataTemplate>
-
-                                    <Button Width="65"
-                                            Height="48"
-                                            Margin="5"
-                                            Padding="3"
-                                            Content="{Binding SeatCode}"
-                                            ToolTip="{Binding SeatType}"
-
-                                            Command="{Binding DataContext.ToggleSeatCommand,
-                                                RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
-
-                                            CommandParameter="{Binding}">
-
-                                        <Button.Style>
-                                            <Style TargetType="{x:Type Button}">
-
-                                                <Setter Property="Background"
-                                                        Value="#16A34A"/>
-
-                                                <Setter Property="Foreground"
-                                                        Value="White"/>
-
-                                                <Setter Property="FontWeight"
-                                                        Value="Bold"/>
-
-                                                <Setter Property="BorderThickness"
-                                                        Value="0"/>
-
-                                                <Setter Property="Cursor"
-                                                        Value="Hand"/>
-
-                                                <Style.Triggers>
-
-                                                    <!-- SELECTED -->
-                                                    <DataTrigger
-                                                        Binding="{Binding IsSelected}"
-                                                        Value="True">
-
-                                                        <Setter
-                                                            Property="Background"
-                                                            Value="#2563EB"/>
-
-                                                    </DataTrigger>
-
-                                                    <!-- BOOKED: RED HAS PRIORITY -->
-                                                    <DataTrigger
-                                                        Binding="{Binding IsBooked}"
-                                                        Value="True">
-
-                                                        <Setter
-                                                            Property="Background"
-                                                            Value="#DC2626"/>
-
-                                                        <Setter
-                                                            Property="Foreground"
-                                                            Value="White"/>
-
-                                                    </DataTrigger>
-
-                                                </Style.Triggers>
-
-                                            </Style>
-                                        </Button.Style>
-
-                                    </Button>
-
-                                </DataTemplate>
-
-                            </ItemsControl.ItemTemplate>
-
-                        </ItemsControl>
-
-                    </Border>
-
-                    <!-- BOOKING SUMMARY -->
+                                        <!-- BOOKING SUMMARY -->
                     <Border Background="#EFF6FF"
                             CornerRadius="8"
                             Padding="15"
@@ -231,13 +78,14 @@
                         <StackPanel>
 
                             <TextBlock
-                                Text="{Binding SelectedSeatCount,
+                                Text="{Binding SelectedSeatLabels,
                                     StringFormat='Selected seats: {0}'}"
+                                TextWrapping="Wrap"
                                 Margin="0,0,0,8"/>
 
                             <TextBlock
-                                Text="{Binding AvailableSeatCount,
-                                    StringFormat='Available seats: {0}'}"
+                                Text="{Binding SelectedSeatCount,
+                                    StringFormat='Number of seats: {0}'}"
                                 Margin="0,0,0,8"/>
 
                             <TextBlock

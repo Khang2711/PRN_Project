@@ -112,6 +112,18 @@ public class BookingViewModel : BaseViewModel
     public int SelectedSeatCount => Seats.Count(s => s.IsSelected);
     public int AvailableSeatCount => Seats.Count(s => !s.IsBooked);
 
+    // The Booking tab only summarizes seats selected in the preview window.
+    public string SelectedSeatLabels
+    {
+        get
+        {
+            var codes = Seats.Where(s => s.IsSelected && !s.IsBooked)
+                .Select(s => s.SeatCode)
+                .ToArray();
+            return codes.Length > 0 ? string.Join(", ", codes) : "-";
+        }
+    }
+
     // Explain why the disabled Cancel Booking button cannot be used.
     public string CancellationNotice => SelectedBooking?.PaymentStatus == "Paid"
         ? "Đơn đã thanh toán nên không thể hủy."
@@ -207,6 +219,7 @@ public class BookingViewModel : BaseViewModel
     private void UpdateSeatInfo()
     {
         OnPropertyChanged(nameof(SelectedSeatCount));
+        OnPropertyChanged(nameof(SelectedSeatLabels));
         OnPropertyChanged(nameof(AvailableSeatCount));
         OnPropertyChanged(nameof(TotalPrice));
         CommandManager.InvalidateRequerySuggested();
