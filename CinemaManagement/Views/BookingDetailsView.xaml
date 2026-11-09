@@ -212,6 +212,10 @@
 
                         </StackPanel>
 
+                        <TextBlock Text="{Binding CancellationNotice}"
+                                   Foreground="#B91C1C" TextWrapping="Wrap"
+                                   Margin="0,10,0,0"/>
+
                         <TextBlock Text="{Binding BookingsMessage}"
                                    Foreground="#2563EB"
                                    TextWrapping="Wrap"

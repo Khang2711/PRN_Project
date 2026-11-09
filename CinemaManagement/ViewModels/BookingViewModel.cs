@@ -2,6 +2,8 @@ using CinemaManagement.Helpers;
 using CinemaManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Linq;
 using System.ComponentModel;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -102,11 +104,22 @@ public class BookingViewModel : BaseViewModel
         {
             _selectedBooking = value;
             OnPropertyChanged(nameof(SelectedBooking));
+            OnPropertyChanged(nameof(CancellationNotice));
             CommandManager.InvalidateRequerySuggested();
         }
     }
 
     public int SelectedSeatCount => Seats.Count(s => s.IsSelected);
+    public int AvailableSeatCount => Seats.Count(s => !s.IsBooked);
+
+    // Explain why the disabled Cancel Booking button cannot be used.
+    public string CancellationNotice => SelectedBooking?.PaymentStatus == "Paid"
+        ? "Đơn đã thanh toán nên không thể hủy."
+        : SelectedBooking?.Status == "Cancelled"
+            ? "Đơn này đã được hủy."
+            : SelectedBooking != null && SelectedBooking.ShowtimeStart <= DateTime.Now
+                ? "Suất chiếu đã bắt đầu nên không thể hủy."
+                : string.Empty;
 
     public decimal TotalPrice => (SelectedShowtime?.TicketPrice ?? 0) * SelectedSeatCount;
 
@@ -165,10 +178,36 @@ public class BookingViewModel : BaseViewModel
         LoadMyBookings();
     }
 
+    // Bring the current preview selection into the Booking tab without saving anything.
+    public void BeginBooking(Showtime showtime, IEnumerable<int>? previewSeats = null)
+    {
+        try
+        {
+            using var db = new CinemaManagementDbContext();
+            SelectedShowtime = db.Showtimes.AsNoTracking()
+                .Include(s => s.Movie)
+                .Include(s => s.Room)
+                .FirstOrDefault(s => s.ShowtimeId == showtime.ShowtimeId) ?? showtime;
+        }
+        catch (Exception)
+        {
+            SelectedShowtime = showtime;
+        }
+
+        if (previewSeats != null)
+        {
+            var ids = previewSeats.ToHashSet();
+            foreach (var seat in Seats.Where(s => !s.IsBooked && ids.Contains(s.SeatId)))
+                seat.IsSelected = true;
+            UpdateSeatInfo();
+        }
+    }
+
     // Báo cho giao diện cập nhật số ghế và tổng tiền
     private void UpdateSeatInfo()
     {
         OnPropertyChanged(nameof(SelectedSeatCount));
+        OnPropertyChanged(nameof(AvailableSeatCount));
         OnPropertyChanged(nameof(TotalPrice));
         CommandManager.InvalidateRequerySuggested();
     }
@@ -202,7 +241,7 @@ public class BookingViewModel : BaseViewModel
             int roomId = SelectedShowtime.RoomId;
 
             var bookedSeatIds = db.BookingDetails
-                .Where(d => d.ShowtimeId == showtimeId && !d.IsCancelled)
+                .Where(d => d.ShowtimeId == showtimeId && !d.IsCancelled && !d.Booking.IsCancelled && d.Booking.Status != "Cancelled")
                 .Select(d => d.SeatId)
                 .ToList();
 
@@ -235,13 +274,13 @@ public class BookingViewModel : BaseViewModel
         UpdateSeatInfo();
     }
 
-    // F28: Tạo Booking và BookingDetails
+
+    // F28: Create both the booking and tickets in a single protected transaction.
     private void ConfirmBooking()
     {
         var selectedSeatIds = Seats
             .Where(s => s.IsSelected && !s.IsBooked)
-            .Select(s => s.SeatId)
-            .ToList();
+            .Select(s => s.SeatId).Distinct().ToList();
 
         if (!IsCustomer || SelectedShowtime == null || selectedSeatIds.Count == 0)
         {
@@ -249,29 +288,50 @@ public class BookingViewModel : BaseViewModel
             return;
         }
 
-        int showtimeId = SelectedShowtime.ShowtimeId;
-
         try
         {
             using var db = new CinemaManagementDbContext();
+            using var tx = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
+            int showtimeId = SelectedShowtime.ShowtimeId;
 
-            var customer = db.Users.FirstOrDefault(u => u.Username == Username);
-            var showtime = db.Showtimes.FirstOrDefault(
-                s => s.ShowtimeId == showtimeId && s.IsActive && s.StartTime > DateTime.Now);
+            var customer = db.Users.SingleOrDefault(u =>
+                u.Username == Username && u.IsActive && u.Role == "Customer");
+            var showtime = db.Showtimes.SingleOrDefault(s =>
+                s.ShowtimeId == showtimeId && s.IsActive && s.StartTime > DateTime.Now);
 
-            if (customer == null || showtime == null)
+            if (customer == null || showtime == null || showtime.TicketPrice <= 0)
             {
-                Message = "This showtime is no longer available.";
+                Message = "The customer account or showtime is no longer available.";
                 return;
             }
 
-            // Booking và các BookingDetail được lưu trong 1 lần SaveChanges (tự là 1 transaction).
-            // Ghế bị đặt trùng sẽ vướng unique index UX_BookingDetails_ActiveSeatPerShowtime.
+            var validSeatIds = db.Seats
+                .Where(s => selectedSeatIds.Contains(s.SeatId)
+                    && s.RoomId == showtime.RoomId && s.IsActive)
+                .Select(s => s.SeatId).ToList();
+
+            if (validSeatIds.Count != selectedSeatIds.Count)
+            {
+                Message = "One or more selected seats are no longer valid.";
+                return;
+            }
+
+            bool alreadyBooked = db.BookingDetails.Any(d =>
+                d.ShowtimeId == showtimeId && selectedSeatIds.Contains(d.SeatId)
+                && !d.IsCancelled && !d.Booking.IsCancelled
+                && d.Booking.Status != "Cancelled");
+
+            if (alreadyBooked)
+            {
+                Message = "A seat was booked by another customer. Refresh and choose again.";
+                return;
+            }
+
             var booking = new Booking
             {
-                BookingCode = "BK" + Guid.NewGuid().ToString("N")[..12].ToUpper(),
+                BookingCode = "BK" + Guid.NewGuid().ToString("N")[..12].ToUpperInvariant(),
                 CustomerId = customer.UserId,
-                ShowtimeId = showtime.ShowtimeId,
+                ShowtimeId = showtimeId,
                 BookingTime = DateTime.Now,
                 Status = "Pending",
                 PaymentStatus = "Unpaid",
@@ -279,19 +339,18 @@ public class BookingViewModel : BaseViewModel
             };
 
             foreach (int seatId in selectedSeatIds)
-            {
                 booking.BookingDetails.Add(new BookingDetail
                 {
-                    ShowtimeId = showtime.ShowtimeId,
+                    ShowtimeId = showtimeId,
                     SeatId = seatId,
                     PriceAtBooking = showtime.TicketPrice,
                     IsCancelled = false,
                     CheckedIn = false
                 });
-            }
 
             db.Bookings.Add(booking);
             db.SaveChanges();
+            tx.Commit();
 
             LoadSeats();
             LoadMyBookings(booking.BookingId);
@@ -304,7 +363,6 @@ public class BookingViewModel : BaseViewModel
         }
         catch (Exception ex)
         {
-            LoadSeats();
             Message = "Cannot create booking: " + ex.GetBaseException().Message;
         }
     }
@@ -318,7 +376,7 @@ public class BookingViewModel : BaseViewModel
         && b.Status != "Completed";
 
     // F29: Tải danh sách booking của khách hàng; selectedBookingId = booking cần chọn lại sau khi tải
-    private void LoadMyBookings(int selectedBookingId = 0)
+    public void LoadMyBookings(int selectedBookingId = 0)
     {
         MyBookings.Clear();
         SelectedBooking = null;
@@ -398,6 +456,7 @@ public class BookingViewModel : BaseViewModel
         try
         {
             using var db = new CinemaManagementDbContext();
+            using var tx = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
 
             // Chỉ lấy booking của khách hàng đang đăng nhập
             var booking = db.Bookings
@@ -420,6 +479,7 @@ public class BookingViewModel : BaseViewModel
             }
 
             db.SaveChanges();
+            tx.Commit();
 
             LoadMyBookings(bookingId);
             BookingsMessage = "Booking cancelled successfully. Seats have been released.";

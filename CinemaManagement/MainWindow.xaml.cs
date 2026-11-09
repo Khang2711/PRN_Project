@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -31,9 +32,6 @@ public partial class MainWindow : Window
         _bookingViewModel = new BookingViewModel(_username, _role);
         BookingControl.DataContext = _bookingViewModel;
         ViewBookingControl.DataContext = _bookingViewModel;
-
-        ShowtimesControl.AddHandler(Selector.SelectionChangedEvent,
-            new SelectionChangedEventHandler(Showtime_SelectionChanged), true);
 
         if (!_bookingViewModel.IsCustomer)
         {
@@ -78,15 +76,12 @@ public partial class MainWindow : Window
         _bookingViewModel.LoadMyBookings();
     }
 
-    private void Showtime_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    // The preview's "Đặt ghế" action explicitly opens Booking.
+    public void OpenBooking(Showtime showtime, IEnumerable<int>? preselectedSeatIds = null)
     {
         if (!_bookingViewModel.IsCustomer) return;
-        if (e.OriginalSource is DataGrid grid && grid.SelectedItem is Showtime showtime)
-        {
-            _bookingViewModel.SelectedShowtime = showtime;
-            MainTabControl.SelectedItem = BookingTab;
-            grid.SelectedItem = null;
-        }
+        _bookingViewModel.BeginBooking(showtime, preselectedSeatIds);
+        MainTabControl.SelectedItem = BookingTab;
     }
 
     private void SignOutButton_Click(object sender, RoutedEventArgs e)
