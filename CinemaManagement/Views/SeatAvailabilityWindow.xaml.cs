@@ -38,6 +38,11 @@ namespace CinemaManagement.Views
             SelectedSeatIds = _viewModel.Seats
                 .Where(s => s.IsSelected && !s.IsBooked)
                 .Select(s => s.SeatId).ToArray();
+            if (SelectedSeatIds.Count == 0)
+            {
+                _viewModel.Message = "Vui lòng chọn ít nhất một ghế trước khi tiếp tục.";
+                return;
+            }
             DialogResult = true;
         }
 
