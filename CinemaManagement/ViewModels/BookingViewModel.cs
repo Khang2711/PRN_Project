@@ -52,7 +52,6 @@ public class BookingListItem
     public string Status { get; set; } = "";
     public string PaymentStatus { get; set; } = "";
     public bool CanCancel { get; set; }
-    public bool CanPay { get; set; }
     public List<BookingSeatDetailItem> SeatDetails { get; set; } = new();
 
     public string ShowtimeText => ShowtimeStart.ToString("dd/MM/yyyy HH:mm");
@@ -310,15 +309,13 @@ public class BookingViewModel : BaseViewModel
         }
     }
 
-    // Thanh toán được khi chưa hủy, chưa thanh toán và chưa chiếu
-    private static bool IsPayable(Booking b) =>
+    // F31: Hủy booking chưa thanh toán, chưa bị hủy, chưa chiếu và chưa Completed
+    private static bool IsCancellable(Booking b) =>
         !b.IsCancelled
         && b.Status != "Cancelled"
         && b.PaymentStatus == "Unpaid"
-        && b.Showtime.StartTime > DateTime.Now;
-
-    // F31: Hủy được khi thanh toán được và chưa Completed
-    private static bool IsCancellable(Booking b) => IsPayable(b) && b.Status != "Completed";
+        && b.Showtime.StartTime > DateTime.Now
+        && b.Status != "Completed";
 
     // F29: Tải danh sách booking của khách hàng; selectedBookingId = booking cần chọn lại sau khi tải
     private void LoadMyBookings(int selectedBookingId = 0)
@@ -367,7 +364,6 @@ public class BookingViewModel : BaseViewModel
                     TotalAmount = seatDetails.Sum(s => s.PriceAtBooking),
                     Status = b.Status,
                     PaymentStatus = b.PaymentStatus,
-                    CanPay = IsPayable(b),
                     CanCancel = IsCancellable(b),
                     SeatDetails = seatDetails
                 });

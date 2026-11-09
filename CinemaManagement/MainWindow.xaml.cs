@@ -74,7 +74,18 @@ public partial class MainWindow : Window
             MainTabControl.SelectedItem = BrowseMoviesTab;
         }
     }
+    // Navigate to Booking with the selected showtime
+    public void OpenBooking(Showtime showtime)
+    {
+        if (!_bookingViewModel.IsCustomer)
+        {
+            return;
+        }
 
+        _bookingViewModel.SelectedShowtime = showtime;
+
+        MainTabControl.SelectedItem = BookingTab;
+    }
     private void Showtime_SelectionChanged(
         object sender,
         SelectionChangedEventArgs e)

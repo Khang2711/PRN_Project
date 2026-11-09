@@ -201,17 +201,6 @@
 
                         <StackPanel Orientation="Horizontal">
 
-                            <Button Content="Pay Now"
-                                    IsEnabled="{Binding SelectedBooking.CanPay}"
-                                    Width="130"
-                                    Height="40"
-                                    Margin="0,0,12,0"
-                                    Background="#2563EB"
-                                    Foreground="White"
-                                    BorderThickness="0"
-                                    FontWeight="SemiBold"
-                                    Click="PayNow_Click"/>
-
                             <Button Content="Cancel Booking"
                                     Command="{Binding CancelBookingCommand}"
                                     Width="150"

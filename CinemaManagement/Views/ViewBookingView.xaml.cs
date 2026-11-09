@@ -11,18 +11,14 @@ public partial class ViewBookingView : UserControl
         InitializeComponent();
     }
 
-    // F30: Chọn một dòng thì mở trang Booking Details
+    // F30: Chọn một booking để mở trang chi tiết
     private void BookingGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        BookingListItem? booking = BookingGrid.SelectedItem as BookingListItem;
-        BookingViewModel? vm = DataContext as BookingViewModel;
-
-        if (booking == null || vm == null)
+        if (BookingGrid.SelectedItem is not BookingListItem ||
+            DataContext is not BookingViewModel vm)
         {
             return;
         }
-
-        vm.SelectedBooking = booking;
 
         // Tạo trang chi tiết và dùng chung ViewModel
         BookingDetailsView detailsView = new BookingDetailsView();
