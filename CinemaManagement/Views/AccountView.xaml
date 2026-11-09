@@ -54,6 +54,7 @@
                         <ComboBox ItemsSource="{Binding Roles}" SelectedItem="{Binding SelectedRole}" Width="120" Height="34"/>
                         <Button Content="Save Role" Command="{Binding ChangeRoleCommand}" Background="#2563EB" Foreground="White" Padding="15,7" Margin="10,0,10,0" BorderThickness="0"/>
                         <Button Content="Deactivate" Command="{Binding DeactivateCommand}" Background="#EF4444" Foreground="White" Padding="15,7" BorderThickness="0"/>
+                        <Button Content="Activate" Command="{Binding ActivateCommand}" Background="#16A34A" Foreground="White" Padding="15,7" Margin="10,0,0,0" BorderThickness="0"/>
                     </StackPanel>
                 </Grid>
             </TabItem>

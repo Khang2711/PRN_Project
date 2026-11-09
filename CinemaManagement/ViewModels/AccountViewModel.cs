@@ -36,6 +36,7 @@ public class AccountViewModel : BaseViewModel
     public ICommand RefreshCommand { get; }
     public ICommand ChangeRoleCommand { get; }
     public ICommand DeactivateCommand { get; }
+    public ICommand ActivateCommand { get; }
 
     public AccountViewModel(string adminUsername)
     {
@@ -43,6 +44,7 @@ public class AccountViewModel : BaseViewModel
         RefreshCommand = new RelayCommand(_ => LoadUsers());
         ChangeRoleCommand = new RelayCommand(_ => ChangeRole(), _ => SelectedUser != null);
         DeactivateCommand = new RelayCommand(_ => Deactivate(), _ => SelectedUser?.IsActive == true);
+        ActivateCommand = new RelayCommand(_ => Activate(), _ => SelectedUser?.IsActive == false);
         LoadUsers();
     }
     private void RequireAdmin(CinemaManagementDbContext db)
@@ -130,6 +132,25 @@ public class AccountViewModel : BaseViewModel
             MessageBox.Show("User account deactivated successfully."); LoadUsers();
         }
         catch (Exception ex) { Error("Cannot deactivate user", ex); }
+    }
+
+    private void Activate()
+    {
+        if (SelectedUser == null) return;
+        var id = SelectedUser.UserId;
+        if (MessageBox.Show($"Activate {SelectedUser.Username}? This account will be able to sign in again.", "Activate User", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        try
+        {
+            using var db = new CinemaManagementDbContext();
+            using var tx = db.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
+            RequireAdmin(db);
+            var user = db.Users.Single(x => x.UserId == id);
+            if (user.IsActive) throw new InvalidOperationException("This account is already active.");
+            user.IsActive = true;
+            db.SaveChanges(); tx.Commit();
+            MessageBox.Show("User account activated successfully."); LoadUsers();
+        }
+        catch (Exception ex) { Error("Cannot activate user", ex); }
     }
     private static void Error(string title, Exception ex) => MessageBox.Show(ex.GetBaseException().Message, title, MessageBoxButton.OK, MessageBoxImage.Error);
 }
