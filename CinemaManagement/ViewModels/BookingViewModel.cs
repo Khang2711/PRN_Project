@@ -82,6 +82,7 @@ public class BookingViewModel : BaseViewModel
     public ICommand RefreshMyBookingsCommand { get; }
     public ICommand LookUpBookingCommand { get; }
     public ICommand CancelBookingCommand { get; }
+    public ICommand BackToBookingListCommand { get; }
 
     // Chỉ tài khoản Customer mới được đặt vé
     public bool IsCustomer => _role == "Customer";
@@ -104,10 +105,14 @@ public class BookingViewModel : BaseViewModel
         {
             _selectedBooking = value;
             OnPropertyChanged(nameof(SelectedBooking));
+            OnPropertyChanged(nameof(IsBookingDetailsOpen));
             OnPropertyChanged(nameof(CancellationNotice));
             CommandManager.InvalidateRequerySuggested();
         }
     }
+
+    // Selecting a booking switches from the list to its details without code-behind navigation.
+    public bool IsBookingDetailsOpen => SelectedBooking != null;
 
     public int SelectedSeatCount => Seats.Count(s => s.IsSelected);
     public int AvailableSeatCount => Seats.Count(s => !s.IsBooked);
@@ -186,6 +191,8 @@ public class BookingViewModel : BaseViewModel
         CancelBookingCommand = new RelayCommand(
             _ => CancelSelectedBooking(),
             _ => IsCustomer && SelectedBooking != null && SelectedBooking.CanCancel);
+
+        BackToBookingListCommand = new RelayCommand(_ => SelectedBooking = null);
 
         LoadMyBookings();
     }

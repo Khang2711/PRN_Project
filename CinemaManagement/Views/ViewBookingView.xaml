@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="CinemaManagement.Views.ViewBookingView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="clr-namespace:CinemaManagement.Views"
              Background="#F5F6FA">
 
     <Grid Margin="20">
@@ -9,8 +10,17 @@
         <!-- BOOKING LIST                      -->
         <!-- ================================= -->
 
-        <Grid x:Name="ListPage"
-              Visibility="Visible">
+        <Grid x:Name="ListPage">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBookingDetailsOpen}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -119,7 +129,6 @@
                               ItemsSource="{Binding BookingView}"
                               SelectedItem="{Binding SelectedBooking,
                                   Mode=TwoWay}"
-                              SelectionChanged="BookingGrid_SelectionChanged"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               CanUserAddRows="False"
@@ -193,8 +202,18 @@
         <!-- DETAIL VIEW CONTAINER             -->
         <!-- ================================= -->
 
-        <ContentControl x:Name="DetailsHost"
-                        Visibility="Collapsed"/>
+        <views:BookingDetailsView>
+            <views:BookingDetailsView.Style>
+                <Style TargetType="{x:Type views:BookingDetailsView}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBookingDetailsOpen}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </views:BookingDetailsView.Style>
+        </views:BookingDetailsView>
 
     </Grid>
 
