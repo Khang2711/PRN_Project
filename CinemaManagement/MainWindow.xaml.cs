@@ -18,17 +18,23 @@ public partial class MainWindow : Window
         // ViewModel owns navigation and visibility. The View only composes child screens.
         var bookingViewModel = new BookingViewModel(username, role);
         _viewModel = new MainWindowViewModel(username, role, bookingViewModel);
-        DataContext = _viewModel;
-        _viewModel.SignOutRequested += SignOut;
 
+        // Give each child screen its own DataContext before setting the main window's.
+        // Hidden screens must not inherit MainWindowViewModel: their editable fields
+        // (such as AccountView.Username) would otherwise bind to read-only properties.
         BrowseMoviesControl.Username = username;
         BookingControl.DataContext = bookingViewModel;
         ViewBookingControl.DataContext = bookingViewModel;
+        PaymentsControl.DataContext = (_viewModel.IsStaff || _viewModel.IsAdmin)
+            ? new PaymentsViewModel(username)
+            : null;
+        AccountControl.DataContext = _viewModel.IsAdmin
+            ? new AccountViewModel(username)
+            : null;
 
-        if (_viewModel.IsStaff || _viewModel.IsAdmin)
-            PaymentsControl.DataContext = new PaymentsViewModel(username);
-        if (_viewModel.IsAdmin)
-            AccountControl.DataContext = new AccountViewModel(username);
+        DataContext = _viewModel;
+        _viewModel.SignOutRequested += SignOut;
+
         if (_viewModel.IsCustomer)
             CustomerProfileControl.LoadProfile(username);
 
