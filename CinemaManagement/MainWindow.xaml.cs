@@ -34,6 +34,8 @@ public partial class MainWindow : Window
 
         if (ShowtimesControl.DataContext is ShowtimesViewModel showtimesVm)
             showtimesVm.CanManageShowtimes = _viewModel.IsAdmin;
+
+        _viewModel.InitializeNavigation();
     }
 
     // Kept for callers that already navigate here from the showtime preview.

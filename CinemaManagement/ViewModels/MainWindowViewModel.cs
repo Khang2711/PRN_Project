@@ -51,8 +51,14 @@ public sealed class MainWindowViewModel : BaseViewModel
         Username = username;
         Role = role;
         _bookingViewModel = bookingViewModel;
-        _selectedTabIndex = IsStaff ? PaymentsTabIndex : IsAdmin ? ShowtimesTabIndex : BrowseMoviesTabIndex;
+        // Binding is connected before choosing a tab to avoid WPF selection initialization races.
+        _selectedTabIndex = -1;
         SignOutCommand = new RelayCommand(_ => SignOutRequested?.Invoke());
+    }
+
+    public void InitializeNavigation()
+    {
+        SelectedTabIndex = IsStaff ? PaymentsTabIndex : IsAdmin ? ShowtimesTabIndex : BrowseMoviesTabIndex;
     }
 
     public void OpenBooking(Showtime showtime, IEnumerable<int>? selectedSeatIds = null)
