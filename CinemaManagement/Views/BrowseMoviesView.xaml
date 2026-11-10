@@ -157,14 +157,14 @@
                                             Background="#2563EB"
                                             Style="{StaticResource RoundButton}"
                                             CommandParameter="{Binding}"
-                                            Click="ViewDetails_Click"/>
+                                            Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
 
                                     <!-- Showtimes button -->
                                     <Button Content="Xem lịch chiếu"
                                             Background="#16A34A"
                                             Style="{StaticResource RoundButton}"
                                             CommandParameter="{Binding}"
-                                            Click="ViewShowtimes_Click"/>
+                                            Command="{Binding DataContext.ViewShowtimesCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

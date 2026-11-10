@@ -1,7 +1,8 @@
 using System.ComponentModel;
-using System.Windows.Controls;
 using System.Windows;
+using System.Windows.Controls;
 using CinemaManagement.Models;
+using CinemaManagement.ViewModels;
 
 namespace CinemaManagement.Views;
 
@@ -12,27 +13,25 @@ public partial class BrowseMoviesView : UserControl
     public BrowseMoviesView()
     {
         InitializeComponent();
-        if (!DesignerProperties.GetIsInDesignMode(this))
-            DataContext = new ViewModels.BrowseMoviesViewModel();
+        if (DesignerProperties.GetIsInDesignMode(this))
+            return;
+
+        var vm = new BrowseMoviesViewModel();
+        vm.MovieDetailsRequested += OpenMovieDetails;
+        vm.MovieShowtimesRequested += OpenMovieShowtimes;
+        DataContext = vm;
     }
 
-    private void ViewDetails_Click(object sender, RoutedEventArgs e)
+    // Dialog creation belongs to the View; command intent lives in the ViewModel.
+    private void OpenMovieDetails(Movie movie)
     {
-        if (sender is Button button && button.CommandParameter is Movie movie)
-        {
-            MovieDetailsWindow popup = new MovieDetailsWindow(movie);
-            popup.Owner = Window.GetWindow(this);
-            popup.ShowDialog();
-        }
+        var popup = new MovieDetailsWindow(movie) { Owner = Window.GetWindow(this) };
+        popup.ShowDialog();
     }
 
-    private void ViewShowtimes_Click(object sender, RoutedEventArgs e)
+    private void OpenMovieShowtimes(Movie movie)
     {
-        if (sender is Button button && button.CommandParameter is Movie movie)
-        {
-            MovieShowtimesWindow popup = new MovieShowtimesWindow(movie, Username);
-            popup.Owner = Window.GetWindow(this);
-            popup.ShowDialog();
-        }
+        var popup = new MovieShowtimesWindow(movie, Username) { Owner = Window.GetWindow(this) };
+        popup.ShowDialog();
     }
 }
