@@ -32,6 +32,7 @@ public class RoomsSeatsViewModel : BaseViewModel
 
             _showDeletedRooms = value;
             OnPropertyChanged();
+            // Reload rooms when the deleted-room filter changes.
             LoadRooms(SelectedRoom?.RoomId);
         }
     }
@@ -63,6 +64,7 @@ public class RoomsSeatsViewModel : BaseViewModel
             RoomActiveInput = SelectedRoom.IsActive;
 
             SelectedSeat = null;
+            // Refresh the seat list when the selected room changes.
             LoadSeats();
         }
     }
@@ -181,6 +183,7 @@ public class RoomsSeatsViewModel : BaseViewModel
 
     public RoomsSeatsViewModel()
     {
+        // Initialize the lists, connect commands, and load the first room.
         Rooms = new ObservableCollection<Room>();
         Seats = new ObservableCollection<Seat>();
 
@@ -203,7 +206,9 @@ public class RoomsSeatsViewModel : BaseViewModel
             using var db = new CinemaManagementDbContext();
 
             var data = db.Rooms
+                // Load active seats with each room for the seat list.
                 .Include(r => r.Seats.Where(s => s.IsActive))
+                // These records are only displayed, so change tracking is not needed.
                 .AsNoTracking()
                 .Where(r => ShowDeletedRooms || r.IsActive)
                 .OrderBy(r => r.RoomId)
@@ -216,6 +221,7 @@ public class RoomsSeatsViewModel : BaseViewModel
                 Rooms.Add(room);
             }
 
+            // Keep the previous selection after reloading the room list.
             Room? roomToSelect = null;
 
             if (selectedRoomId.HasValue)
@@ -253,6 +259,7 @@ public class RoomsSeatsViewModel : BaseViewModel
             return;
         }
 
+        // Show active seats in row and seat-number order.
         var data = SelectedRoom.Seats
             .Where(s => s.IsActive)
             .OrderBy(s => s.SeatRow)
@@ -265,6 +272,7 @@ public class RoomsSeatsViewModel : BaseViewModel
         }
     }
 
+    // A room with a current or upcoming showtime must remain active.
     private static bool HasCurrentOrUpcomingShowtimes(
         CinemaManagementDbContext db,
         int roomId)
@@ -277,6 +285,7 @@ public class RoomsSeatsViewModel : BaseViewModel
             showtime.EndTime >= now);
     }
 
+    // Protect seats that are still linked to valid booking records.
     private static bool HasNonCancelledBooking(
         CinemaManagementDbContext db,
         int seatId)
@@ -319,6 +328,7 @@ public class RoomsSeatsViewModel : BaseViewModel
             using var db = new CinemaManagementDbContext();
 
             string roomName = RoomNameInput.Trim();
+            // Room names must be unique.
             if (db.Rooms.Any(r => r.RoomName == roomName))
             {
                 MessageBox.Show(
@@ -394,6 +404,7 @@ public class RoomsSeatsViewModel : BaseViewModel
             using var db = new CinemaManagementDbContext();
 
             string roomName = RoomNameInput.Trim();
+            // Exclude the current room when checking for duplicate names.
             if (db.Rooms.Any(r =>
                 r.RoomName == roomName &&
                 r.RoomId != SelectedRoom.RoomId))
@@ -416,6 +427,7 @@ public class RoomsSeatsViewModel : BaseViewModel
                 return;
             }
 
+            // Do not deactivate a room while it has a current or upcoming showtime.
             if (room.IsActive && !RoomActiveInput &&
                 HasCurrentOrUpcomingShowtimes(db, room.RoomId))
             {
@@ -502,6 +514,7 @@ public class RoomsSeatsViewModel : BaseViewModel
                 return;
             }
 
+            // Soft delete: keep the room record for existing references.
             room.IsActive = false;
 
             db.SaveChanges();
@@ -567,6 +580,7 @@ public class RoomsSeatsViewModel : BaseViewModel
                 return;
             }
 
+            // Restore the existing room instead of creating a new record.
             room.IsActive = true;
             db.SaveChanges();
 
@@ -635,6 +649,7 @@ public class RoomsSeatsViewModel : BaseViewModel
             int roomId = SelectedRoom.RoomId;
             string seatRow = SeatRowInput.Trim().ToUpper();
 
+            // A seat position must be unique within its room.
             Seat? existingSeat = db.Seats.FirstOrDefault(s =>
                 s.RoomId == roomId &&
                 s.SeatRow == seatRow &&
@@ -667,6 +682,7 @@ public class RoomsSeatsViewModel : BaseViewModel
                     return;
                 }
 
+                // Restore the old seat record to avoid a duplicate position.
                 existingSeat.IsActive = true;
 
                 db.SaveChanges();
@@ -770,6 +786,7 @@ public class RoomsSeatsViewModel : BaseViewModel
                 return;
             }
 
+            // Do not change a seat that is still used by a non-cancelled booking.
             if (HasNonCancelledBooking(db, seat.SeatId))
             {
                 MessageBox.Show(
@@ -783,6 +800,7 @@ public class RoomsSeatsViewModel : BaseViewModel
 
             string newSeatRow = SeatRowInput.Trim().ToUpper();
 
+            // Exclude the current seat when checking its new position.
             bool isDuplicate = db.Seats.Any(s =>
                 s.RoomId == SelectedRoom.RoomId &&
                 s.SeatRow == newSeatRow &&
@@ -874,6 +892,7 @@ public class RoomsSeatsViewModel : BaseViewModel
                 return;
             }
 
+            // Keep seats that are part of valid bookings to protect booking history.
             if (HasNonCancelledBooking(db, seat.SeatId))
             {
                 MessageBox.Show(
@@ -885,6 +904,7 @@ public class RoomsSeatsViewModel : BaseViewModel
                 return;
             }
 
+            // Soft delete: preserve the seat record for booking history.
             seat.IsActive = false;
 
             db.SaveChanges();
