@@ -11,21 +11,21 @@
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                 <TextBlock Text="CINEMA MANAGEMENT" FontSize="24" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock x:Name="CurrentUserText" Foreground="White" FontSize="14" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                    <Button Content="Sign Out" Click="SignOutButton_Click" Padding="14,7" Background="#EF4444" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                    <TextBlock x:Name="CurrentUserText" Text="{Binding CurrentUserDisplay}" Foreground="White" FontSize="14" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                    <Button Content="Sign Out" Command="{Binding SignOutCommand}" Padding="14,7" Background="#EF4444" Foreground="White" BorderThickness="0" Cursor="Hand"/>
                 </StackPanel>
             </Grid>
         </Border>
-        <TabControl x:Name="MainTabControl" Grid.Row="1" Margin="15" FontSize="15">
-            <TabItem x:Name="BrowseMoviesTab" Header="Browse Movies"><views:BrowseMoviesView x:Name="BrowseMoviesControl"/></TabItem>
-            <TabItem x:Name="ShowtimesTab" Header="Showtimes"><views:ShowtimesView x:Name="ShowtimesControl"/></TabItem>
-            <TabItem x:Name="ManageMoviesTab" Header="Manage Movies"><views:ManageMoviesView/></TabItem>
-            <TabItem x:Name="RoomsSeatsTab" Header="Rooms &amp; Seats"><views:RoomsSeatsView/></TabItem>
-            <TabItem x:Name="BookingTab" Header="Booking"><views:BookingView x:Name="BookingControl"/></TabItem>
-            <TabItem x:Name="ViewBookingTab" Header="View Booking"><views:ViewBookingView x:Name="ViewBookingControl"/></TabItem>
-            <TabItem x:Name="CustomerProfileTab" Header="My Profile"><views:CustomerProfileView x:Name="CustomerProfileControl"/></TabItem>
-            <TabItem x:Name="PaymentsTab" Header="Payments"><views:PaymentsView x:Name="PaymentsControl"/></TabItem>
-            <TabItem x:Name="AccountTab" Header="Account"><views:AccountView x:Name="AccountControl"/></TabItem>
+        <TabControl x:Name="MainTabControl" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}" Grid.Row="1" Margin="15" FontSize="15">
+            <TabItem x:Name="BrowseMoviesTab" Visibility="{Binding BrowseMoviesVisibility}" Header="Browse Movies"><views:BrowseMoviesView x:Name="BrowseMoviesControl"/></TabItem>
+            <TabItem x:Name="ShowtimesTab" Visibility="{Binding ShowtimesVisibility}" Header="Showtimes"><views:ShowtimesView x:Name="ShowtimesControl"/></TabItem>
+            <TabItem x:Name="ManageMoviesTab" Visibility="{Binding AdminManagementVisibility}" Header="Manage Movies"><views:ManageMoviesView/></TabItem>
+            <TabItem x:Name="RoomsSeatsTab" Visibility="{Binding AdminManagementVisibility}" Header="Rooms &amp; Seats"><views:RoomsSeatsView/></TabItem>
+            <TabItem x:Name="BookingTab" Visibility="{Binding CustomerVisibility}" Header="Booking"><views:BookingView x:Name="BookingControl"/></TabItem>
+            <TabItem x:Name="ViewBookingTab" Visibility="{Binding CustomerVisibility}" Header="View Booking"><views:ViewBookingView x:Name="ViewBookingControl"/></TabItem>
+            <TabItem x:Name="CustomerProfileTab" Visibility="{Binding CustomerVisibility}" Header="My Profile"><views:CustomerProfileView x:Name="CustomerProfileControl"/></TabItem>
+            <TabItem x:Name="PaymentsTab" Visibility="{Binding PaymentsVisibility}" Header="Payments"><views:PaymentsView x:Name="PaymentsControl"/></TabItem>
+            <TabItem x:Name="AccountTab" Visibility="{Binding AdminManagementVisibility}" Header="Account"><views:AccountView x:Name="AccountControl"/></TabItem>
         </TabControl>
     </Grid>
 </Window>

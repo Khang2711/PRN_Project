@@ -1,4 +1,7 @@
 using CinemaManagement.Models;
+using CinemaManagement.Helpers;
+using System.Collections.Generic;
+using System.Windows.Input;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -30,6 +33,11 @@ namespace CinemaManagement.ViewModels
 
     public class SeatAvailabilityViewModel : BaseViewModel
     {
+        public ICommand ToggleSeatCommand { get; }
+        public ICommand RefreshSeatsCommand { get; }
+        public ICommand ContinueBookingCommand { get; }
+        public event Action<IReadOnlyList<int>>? ContinueBookingRequested;
+
         private readonly string _username;
 
         public Showtime SelectedShowtime { get; }
@@ -57,6 +65,13 @@ namespace CinemaManagement.ViewModels
             MovieTitle = movieTitle;
             _username = username;
             RoomName = showtime.Room?.RoomName ?? "Phòng " + showtime.RoomId;
+            ToggleSeatCommand = new RelayCommand(item => ToggleSeat(item as SeatAvailabilityItem));
+            RefreshSeatsCommand = new RelayCommand(_ =>
+            {
+                LoadSeats();
+                Message = "Đã cập nhật trạng thái ghế.";
+            });
+            ContinueBookingCommand = new RelayCommand(_ => ContinueBooking());
             LoadSeats();
         }
 
@@ -66,6 +81,19 @@ namespace CinemaManagement.ViewModels
             seat.IsSelected = !seat.IsSelected;
             OnPropertyChanged(nameof(SelectedSeats));
             OnPropertyChanged(nameof(TotalPrice));
+        }
+
+        private void ContinueBooking()
+        {
+            // No booking is saved in this window; the Booking tab confirms it.
+            var seatIds = Seats.Where(s => s.IsSelected && !s.IsBooked)
+                .Select(s => s.SeatId).ToArray();
+            if (seatIds.Length == 0)
+            {
+                Message = "Vui lòng chọn ít nhất một ghế trước khi tiếp tục.";
+                return;
+            }
+            ContinueBookingRequested?.Invoke(seatIds);
         }
 
         public void LoadSeats()

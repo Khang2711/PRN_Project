@@ -34,7 +34,7 @@
                     </Style>
                 </DatePicker.Resources>
             </DatePicker>
-            <Button Content="Clear" Width="110" Height="34" Margin="12,0,0,0" Click="ClearFilter_Click"/>
+            <Button Content="Clear" Width="110" Height="34" Margin="12,0,0,0" Command="{Binding ClearFilterCommand}"/>
         </StackPanel>
         <Border Grid.Row="3" Background="White" CornerRadius="8" Padding="10">
             <Grid>
@@ -54,7 +54,8 @@
                                 <DataTemplate>
                                     <Button Content="Chọn ghế" CommandParameter="{Binding}" Background="#16A34A"
                                             Foreground="White" Padding="8,5" Margin="4" BorderThickness="0"
-                                            Cursor="Hand" Click="ViewSeats_Click"/>
+                                            Cursor="Hand"
+                                            Command="{Binding DataContext.ViewSeatsCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

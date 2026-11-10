@@ -1,4 +1,6 @@
 ﻿using CinemaManagement.Models;
+using CinemaManagement.Helpers;
+using System.Windows.Input;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,6 +14,10 @@ namespace CinemaManagement.ViewModels
 {
     class MovieShowtimesViewModel : BaseViewModel
     {
+        public ICommand ViewSeatsCommand { get; }
+        public ICommand ClearFilterCommand { get; }
+        public event Action<Showtime>? SeatPreviewRequested;
+
         public Movie SelectedMovie { get; }
 
         public ObservableCollection<Showtime> Showtimes { get; } = new();
@@ -37,6 +43,11 @@ namespace CinemaManagement.ViewModels
         public MovieShowtimesViewModel(Movie movie)
         {
             SelectedMovie = movie;
+            ViewSeatsCommand = new RelayCommand(value =>
+            {
+                if (value is Showtime showtime) SeatPreviewRequested?.Invoke(showtime);
+            });
+            ClearFilterCommand = new RelayCommand(_ => SelectedDate = null);
             LoadShowtimes();
         }
 

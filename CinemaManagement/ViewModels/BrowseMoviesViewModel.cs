@@ -1,4 +1,6 @@
 using CinemaManagement.Models;
+using CinemaManagement.Helpers;
+using System.Windows.Input;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -9,6 +11,11 @@ namespace CinemaManagement.ViewModels;
 
 public class BrowseMoviesViewModel : BaseViewModel
 {
+    public ICommand ViewDetailsCommand { get; }
+    public ICommand ViewShowtimesCommand { get; }
+    public event Action<Movie>? MovieDetailsRequested;
+    public event Action<Movie>? MovieShowtimesRequested;
+
     public ObservableCollection<Movie> Movies { get; } = new();
 
     private List<Movie> _allMovies = new();
@@ -39,6 +46,14 @@ public class BrowseMoviesViewModel : BaseViewModel
 
     public BrowseMoviesViewModel()
     {
+        ViewDetailsCommand = new RelayCommand(movie =>
+        {
+            if (movie is Movie selected) MovieDetailsRequested?.Invoke(selected);
+        });
+        ViewShowtimesCommand = new RelayCommand(movie =>
+        {
+            if (movie is Movie selected) MovieShowtimesRequested?.Invoke(selected);
+        });
         Load();
     }
 

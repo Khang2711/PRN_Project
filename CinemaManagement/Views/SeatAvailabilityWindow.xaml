@@ -52,7 +52,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button Width="65" Height="52" Margin="5" Padding="2"
-                                        Click="Seat_Click" CommandParameter="{Binding}"
+                                        Command="{Binding DataContext.ToggleSeatCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding}"
                                         BorderThickness="0" Cursor="Hand">
                                     <Button.Style>
                                         <Style TargetType="Button">
@@ -93,9 +93,9 @@
                 <TextBlock Text="{Binding TotalPrice, StringFormat='{}{0:N0} VND'}" Foreground="#2563EB" FontWeight="Bold"/>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button Content="Tải lại ghế" Width="100" Height="34" Margin="0,0,8,0" Click="Refresh_Click"/>
+                <Button Content="Tải lại ghế" Width="100" Height="34" Margin="0,0,8,0" Command="{Binding RefreshSeatsCommand}"/>
                 <Button Content="Đặt ghế" Width="100" Height="34" Background="#2563EB" Foreground="White" BorderThickness="0"
-                        FontWeight="SemiBold" Click="Book_Click"/>
+                        FontWeight="SemiBold" Command="{Binding ContinueBookingCommand}"/>
             </StackPanel>
         </Grid>
 

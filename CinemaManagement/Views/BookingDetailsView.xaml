@@ -17,7 +17,7 @@
             <Button Content="← Back to Booking List"
                     Width="190"
                     Height="38"
-                    Click="BackToList_Click"/>
+                    Command="{Binding BackToBookingListCommand}"/>
 
             <TextBlock Text="BOOKING DETAILS"
                        FontSize="22"
